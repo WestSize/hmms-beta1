@@ -1,0 +1,9 @@
+.nav-item{
+    padding-right: 15px;
+}
+
+.bg-dark {
+    background-color: #bf2e2e!important;
+    height: 150px;
+    border-bottom: black solid 1px;
+}
