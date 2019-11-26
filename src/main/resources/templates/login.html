@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
-<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>-->
-<!--    <link type="text/css" href="css/style.css" rel="stylesheet" />-->
-<!--    <link type="text/css" href="css/text-animation.css" rel="stylesheet" />-->
-<!--    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>-->
-<!--    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">-->
-<!--    <title>HMMS v1.0 ● Начало</title>-->
-<!--</head>-->
 <head>
-    <th:block th:include="~{fragments/head}"/>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link type="text/css" href="css/style.css" rel="stylesheet" />
+    <link type="text/css" href="css/text-animation.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
     <title>HMMS v1.0 ● Начало</title>
 </head>
 <body>
@@ -58,12 +54,18 @@
 </div>
 <!-- animiran text end -->
 
-<!-- login start -->
-<th:block th:include="~{fragments/login-form}"/>
-<!-- login end -->
 
+<!-- login start -->
+<!--<script type="text/javascript">-->
+<!--    setTimeout("window.scrollBy(0,280);",10);-->
+<!--</script>-->
+<a name="loginarea">
+<th:block th:include="~{fragments/login-form}"/>
+</a>
+<!-- login end -->
+<p>
 <!-- footer start -->
-<th:block th:include="~{fragments/footer}"/>
+    <th:block th:include="~{fragments/footer}"/>
 <!-- footer end -->
 </body>
 </html>

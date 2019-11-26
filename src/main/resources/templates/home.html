@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" lang="en">
 <!--<head>-->
 <!--    <meta charset="UTF-8">-->
 <!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
@@ -55,15 +55,12 @@
 </header>
 <!-- header end -->
 <p>
-<!-- animiran text start -->
-<div class="title">
-    <h1>добре<br/>дошли!</h1>
-</div>
-<!-- animiran text end -->
 
-<!-- login start -->
-ivan
-<!-- login end -->
+
+<!-- user panel start -->
+    <th:block th:include="~{fragments/user-panel}"/>
+<!--    <input type="text" class="form-control" name="first_name" id="first_name" th:value="${#authentication.getPrincipal().getUsername()}" title="enter your first name if any.">-->
+<!-- user panel end -->
 
 <!-- footer start -->
 <th:block th:include="~{fragments/footer}"/>
