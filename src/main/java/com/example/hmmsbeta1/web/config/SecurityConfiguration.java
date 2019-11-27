@@ -1,5 +1,6 @@
 package com.example.hmmsbeta1.web.config;
 
+import com.example.hmmsbeta1.web.services.UserDetailsServiceImpl;
 import com.example.hmmsbeta1.web.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,6 +32,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/css/**",
                         "/images/**",
                         "/about/**",
+                        "/services/**",
+                        "/contact/**",
                         "/webjars/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -59,16 +62,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         return auth;
     }
 
-    private UserDetailsService UserPrincipalDetailsService;
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new UserDetailsServiceImpl();
+    }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider());
-
+        auth.userDetailsService(userDetailsService());
     }
 
-//
-    @Autowired
-    public void configureGlobal( DaoAuthenticationProvider auth) throws Exception {
-        auth.setUserDetailsService(UserPrincipalDetailsService);
-    }
+
+
+
+
+
 }
