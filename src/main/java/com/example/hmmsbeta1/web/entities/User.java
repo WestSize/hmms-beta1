@@ -4,6 +4,7 @@ import com.example.hmmsbeta1.web.entities.Role;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "email"))
@@ -25,6 +26,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(
                     name = "role_id", referencedColumnName = "id"))
     private Collection < Role > roles;
+
+//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+//    private List<Worker> workers;
 
     public User() {}
 
@@ -90,6 +94,14 @@ public class User {
     public void setRoles(Collection <Role> roles) {
         this.roles = roles;
     }
+
+//    public List<Worker> getWorkers() {
+//        return workers;
+//    }
+//
+//    public void setWorkers(List<Worker> workers) {
+//        this.workers = workers;
+//    }
 
     @Override
     public String toString() {
