@@ -34,6 +34,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         "/about/**",
                         "/services/**",
                         "/contact/**",
+                        "/error/404**",
                         "/webjars/**").permitAll()
                 .anyRequest().authenticated()
                 .and()

@@ -1,0 +1,86 @@
+<th:block th:fragment>
+
+
+    <div class="container bootstrap snippet">
+        <div class="row">
+            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1></div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-3"><!--left col-->
+
+
+                <div class="text-center">
+                    <img src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" class="avatar img-circle img-thumbnail" alt="avatar">
+                    <h6>Upload a different photo...</h6>
+                    <input type="file" class="text-center center-block file-upload ">
+                </div></hr><br>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">Website <i class="fa fa-link fa-1x"></i></div>
+                    <div class="panel-body"><a href="http://bootnipets.com">bootnipets.com</a></div>
+                </div>
+
+
+                <ul class="list-group">
+                    <li class="list-group-item text-muted">Activity <i class="fa fa-dashboard fa-1x"></i></li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Likes</strong></span> 13</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Posts</strong></span> 37</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78</li>
+                </ul>
+
+
+
+            </div><!--/col-3-->
+            <div class="col-sm-9">
+
+                <th:block th:include="~{fragments/user-panel-navi}"/>
+
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="home">
+                        <hr>
+
+                        <table class="table">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Заглавие</th>
+                            <th scope="col">Подател</th>
+                            <th scope="col">Получател</th>
+                            <th scope="col">Дата и час</th>
+                            <th scope="col">Опции</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="message : ${messages}">
+<!--                        <tr th:each="message : ${#lists.sort(messages)}">-->
+                            <td><a th:href="@{/read-message(id=${message.id})}" th:text="${message.messageSubject}">Title ...</a></td>
+                            <td th:text="${message.userSender}">User sender</td>
+                            <td th:text="${message.userRecipient}">Poluchatel</td>
+                        <td th:text="${message.date}">Data i chas</td>
+                            <td><a th:href="@{/delete-message(id=${message.id})}"><img src="images/delete.png" width="25px" title="Изтрии съобщението..."/> </a></td>
+                        </tr>
+                        </tbody>
+                        </table>
+                    <hr>
+                        <p>
+                            <p>
+
+
+                        <a th:href="@{/new-message}" class="btn btn-lg btn-success" role="button">Ново съобщение</a>
+                        <hr>
+
+
+                </div><!--/tab-pane-->
+
+            </div><!--/tab-content-->
+
+        </div><!--/col-9-->
+    </div><!--/row-->
+
+
+
+
+</th:block>
