@@ -20,29 +20,10 @@ public class Message {
     private String messageText;
     @Column
     private String dateAndTime;
-//    @Column
-//    private int seenBySender;
-//    @Column
-//    private int seenByRecipient;
+
 
     public Message() {
     }
-
-//    public int getSeenBySender() {
-//        return seenBySender;
-//    }
-//
-//    public void setSeenBySender(int seenBySender) {
-//        this.seenBySender = seenBySender;
-//    }
-//
-//    public int getSeenByRecipient() {
-//        return seenByRecipient;
-//    }
-//
-//    public void setSeenByRecipient(int seenByRecipient) {
-//        this.seenByRecipient = seenByRecipient;
-//    }
 
     public long getId() {
         return id;

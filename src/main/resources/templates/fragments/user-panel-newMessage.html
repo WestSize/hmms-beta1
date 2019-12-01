@@ -40,7 +40,13 @@
                 <th:block th:include="~{fragments/user-panel-navi}"/>
 
                 <div th:if="${param.success}">
-                    <div class="alert alert-info">You've successfully sended pm!</div>
+                    <div class="alert alert-info">Вие изпратихте съобщението успешно!</div>
+                </div>
+                <div th:if="${param.noSuchUser}">
+                    <div class="alert alert-danger">Няма такъв потребител в базата данни...</div>
+                </div>
+                <div th:if="${param.noSelfPms}">
+                    <div class="alert alert-danger">Не можеш да изпращаш лични съобщения до себе си...</div>
                 </div>
                 <div class="tab-content">
                     <div class="tab-pane active" id="home">

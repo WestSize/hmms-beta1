@@ -29,6 +29,7 @@ public class MessagesController {
     @Autowired
     private UserRepository userRepository;
 
+
     private Long replyId = null;
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
@@ -55,12 +56,19 @@ public class MessagesController {
 
     @RequestMapping(value="/new-message", method=RequestMethod.POST)
     public String processMessage(@Valid PrivateConversation privateConversation, Message message, Principal principal) {
-        privateConversation.setUserSender(principal.getName());
-        privateMessagesService.saveMessage(privateConversation);
-        message.setPrivateConversation(privateConversation);
-        message.setUserSender(principal.getName());
-        messageRepository.save(message);
-        return "redirect:/new-message?success";
+        if(userRepository.findByEmail(message.getUserRecipient())==null){
+            return "redirect:/new-message?noSuchUser";
+        } else if (message.getUserRecipient().equals(principal.getName())){
+            return "redirect:/new-message?noSelfPms";
+        } else {
+
+            privateConversation.setUserSender(principal.getName());
+            privateMessagesService.saveMessage(privateConversation);
+            message.setPrivateConversation(privateConversation);
+            message.setUserSender(principal.getName());
+            messageRepository.save(message);
+            return "redirect:/new-message?success";
+        }
     }
 
     @RequestMapping(value = "/read-message", method = RequestMethod.GET)
@@ -105,5 +113,4 @@ public class MessagesController {
         messageRepository.deleteById(id);
         return "redirect:/read-message?id="+conversationId;
     }
-
 }
