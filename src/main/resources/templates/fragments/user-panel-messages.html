@@ -38,7 +38,9 @@
 
                 <th:block th:include="~{fragments/user-panel-navi}"/>
 
-
+                <div th:if="${param.sended}">
+                    <div class="alert alert-info">Вашият отговор беше изпратен :)</div>
+                </div>
                 <div class="tab-content">
                     <div class="tab-pane active" id="home">
                         <hr>

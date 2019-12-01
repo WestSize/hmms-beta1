@@ -48,14 +48,13 @@
                         <!-- text form start -->
                         <div class="container contact-form">
                             <form th:action="@{/new-message}" method="post" th:object="${newmsg}">
-                                <h3>Drop Us a Message</h3>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <input type="text" class="form-control" th:field="*{messageSubject}" placeholder="Тема на съобщението..." value="" />
+                                            <input type="text" class="form-control" th:field="*{messageSubject}" placeholder="Тема на съобщението..." required="required" value="" />
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" class="form-control" th:field="*{userRecipient}" placeholder="Email получател..." value="" />
+                                            <input type="email" class="form-control" th:field="*{userRecipient}" placeholder="Email потребител..." required="required" value="" />
                                         </div>
                                         <div class="form-group">
                                             <div id="senderEmail">
@@ -67,13 +66,13 @@
                                                     m = n.getMonth() + 1;
                                                     d = n.getDate();
                                                     h = n.getHours();
-                                                    m = n.getMinutes();
+                                                    mins = n.getMinutes();
                                                     if(m<10){
-                                                        m2 = "0"+m;
+                                                        m2 = "0"+mins;
                                                     } else {
-                                                        m2 = m;
+                                                        m2 = mins;
                                                     }
-                                                    document.getElementById("date").value = m + "/" + d + "/" + y+", "+h+":"+m2;
+                                                    document.getElementById("date").value = d + "/" + m + "/" + y+", "+h+":"+m2;
                                                 </script>
                                             </div>
                                         </div>
@@ -83,11 +82,16 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <textarea class="form-control" th:field="*{messageText}" placeholder="Съобщение" style="width: 100%; height: 150px;"></textarea>
+                                            <textarea class="form-control" th:field="*{messageText}" placeholder="Съобщение"  required="required" style="width: 100%; height: 150px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
                             </form>
+                            <script>
+                                $(document).ready(function() {
+                                    $('#notEmptyForm').bootstrapValidator();
+                                });
+                            </script>
                         </div>
                         <!-- text form end -->
                         <hr>

@@ -41,9 +41,15 @@ public class MessagesController {
 
     @RequestMapping(value="/new-message", method=RequestMethod.POST)
     public String processMessage(@Valid PrivateMessage privateMessage) {
+
         privateMessagesService.saveMessage(privateMessage);
         return "redirect:/new-message?success";
     }
+
+
+
+
+
 
     @RequestMapping(value = "/read-message", method = RequestMethod.GET)
 //    @ResponseBody()

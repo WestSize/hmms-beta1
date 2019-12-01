@@ -10,3 +10,7 @@
 #senderEmail{
     display:none;
 }
+
+textarea {
+    resize: none;
+}
