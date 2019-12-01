@@ -1,18 +1,16 @@
 package com.example.hmmsbeta1.web.controllers;
 
-import com.example.hmmsbeta1.web.entities.PrivateMessage;
-import com.example.hmmsbeta1.web.repositories.PrivateMessagesRepository;
+import com.example.hmmsbeta1.web.entities.Message;
+import com.example.hmmsbeta1.web.entities.PrivateConversation;
+import com.example.hmmsbeta1.web.repositories.MessageRepository;
+import com.example.hmmsbeta1.web.repositories.PrivateConversationRepository;
 import com.example.hmmsbeta1.web.services.PrivateMessagesService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
-import java.util.Optional;
 
 @Controller
 public class MessagesController {
@@ -20,13 +18,18 @@ public class MessagesController {
     private PrivateMessagesService privateMessagesService;
 
     @Autowired
-    private PrivateMessagesRepository privateMessagesRepository;
+    private PrivateConversationRepository privateConversationRepository;
 
+    @Autowired
+    private MessageRepository messageRepository;
+
+    private Long replyId = null;
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
     public String messages(Model model) {
-        if(privateMessagesRepository.findAll().size()>0){
-            model.addAttribute("messages", privateMessagesRepository.findAll());
+        if(privateConversationRepository.findAll().size()>0){
+            model.addAttribute("messages", privateConversationRepository.findAll());
+            model.addAttribute("textmsgs", messageRepository.findAll());
             return "messages";
         } else {
             return "messages-empty";
@@ -35,33 +38,51 @@ public class MessagesController {
 
     @RequestMapping(value = "/new-message", method = RequestMethod.GET)
     public String showNewMessage(Model model){
-        model.addAttribute("newmsg", new PrivateMessage());
+        model.addAttribute("newmsg", new PrivateConversation());
         return "/new-message";
     }
 
     @RequestMapping(value="/new-message", method=RequestMethod.POST)
-    public String processMessage(@Valid PrivateMessage privateMessage) {
-
-        privateMessagesService.saveMessage(privateMessage);
+    public String processMessage(@Valid PrivateConversation privateConversation, Message message) {
+        privateMessagesService.saveMessage(privateConversation);
+        message.setPrivateConversation(privateConversation);
+        messageRepository.save(message);
         return "redirect:/new-message?success";
     }
-
-
-
-
-
 
     @RequestMapping(value = "/read-message", method = RequestMethod.GET)
 //    @ResponseBody()
     public String readMessage(long id, Model model){
-        model.addAttribute("readMessage", privateMessagesRepository.getOne(id));
+        model.addAttribute("readConversation", privateConversationRepository.getOne(id));
+        model.addAttribute("readMessages", messageRepository.findAllByPrivateConversationId(id));
+        model.addAttribute("replymsg", new Message());
+        replyId = id;
         return "read-message";
+    }
+
+    @RequestMapping(value = "/read-message", method = RequestMethod.POST)
+    private String replyMessage(Message message){
+        PrivateConversation privateConversation = privateConversationRepository.getOne(replyId);
+        replyId = null;
+        privateConversation.setDateAndTime(message.getDateAndTime());
+        message.setPrivateConversation(privateConversation);
+        message.setUserRecipient(privateConversation.getUserRecipient());
+        messageRepository.save(message);
+        return "redirect:/messages?sended";
+    }
+
+    @RequestMapping(value = "/delete-conversation")
+    public String deleteConversation(long id){
+        privateConversationRepository.deleteById(id);
+        return "redirect:/messages";
     }
 
     @RequestMapping(value = "/delete-message")
     public String deleteMessage(long id){
-        privateMessagesRepository.deleteById(id);
-        return "redirect:/messages";
+        Message message = messageRepository.getOne(id);
+        int conversationId = Math.toIntExact(message.getPrivateConversation().getId());
+        messageRepository.deleteById(id);
+        return "redirect:/read-message?id="+conversationId;
     }
 
 }

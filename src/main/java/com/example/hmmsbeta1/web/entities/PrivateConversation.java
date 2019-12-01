@@ -1,10 +1,11 @@
 package com.example.hmmsbeta1.web.entities;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
-@Table(name = "PrivateMessages")
-public class PrivateMessage {
+@Table(name = "PrivateConversation")
+public class PrivateConversation {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -17,28 +18,30 @@ public class PrivateMessage {
 //    private User userRecipient;
     @Column(nullable = false)
     private String userRecipient;
+//    @Column
+//    private String messageText;
+    @OneToMany(mappedBy="privateConversation", cascade = CascadeType.ALL)
+    private Set<Message> messages;
     @Column
-    private String messageText;
-    @Column
-    private String date;
+    private String dateAndTime;
 
-    public PrivateMessage() {
+    public PrivateConversation() {
     }
 
-    public String getDate() {
-        return date;
+    public String getDateAndTime() {
+        return dateAndTime;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setDateAndTime(String dateAndTime) {
+        this.dateAndTime = dateAndTime;
     }
 
-    public String getMessageText() {
-        return messageText;
+    public Set<Message> getMessages() {
+        return messages;
     }
 
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
+    public void setMessages(Set<Message> messages) {
+        this.messages = messages;
     }
 
     public Long getId() {

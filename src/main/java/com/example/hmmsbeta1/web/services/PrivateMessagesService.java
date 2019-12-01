@@ -1,7 +1,7 @@
 package com.example.hmmsbeta1.web.services;
 
-import com.example.hmmsbeta1.web.entities.PrivateMessage;
-import com.example.hmmsbeta1.web.repositories.PrivateMessagesRepository;
+import com.example.hmmsbeta1.web.entities.PrivateConversation;
+import com.example.hmmsbeta1.web.repositories.PrivateConversationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,13 +10,13 @@ import java.util.List;
 @Service
 public class PrivateMessagesService {
     @Autowired
-    private PrivateMessagesRepository privateMessagesRepository;
+    private PrivateConversationRepository privateConversationRepository;
 
-    public void saveMessage(PrivateMessage privateMessage){
-        privateMessagesRepository.save(privateMessage);
+    public void saveMessage(PrivateConversation privateConversation){
+        privateConversationRepository.save(privateConversation);
     }
 
-    public List<PrivateMessage> findAll(){
-        return privateMessagesRepository.findAll();
+    public List<PrivateConversation> findAll(){
+        return privateConversationRepository.findAll();
     }
 }

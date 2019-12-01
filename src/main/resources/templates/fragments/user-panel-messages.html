@@ -38,12 +38,12 @@
 
                 <th:block th:include="~{fragments/user-panel-navi}"/>
 
-                <div th:if="${param.sended}">
-                    <div class="alert alert-info">Вашият отговор беше изпратен :)</div>
-                </div>
                 <div class="tab-content">
                     <div class="tab-pane active" id="home">
                         <hr>
+                        <div th:if="${param.sended}">
+                            <div class="alert alert-info">Вашият отговор беше изпратен :)</div>
+                        </div>
 
                         <table class="table">
                         <thead class="thead-dark">
@@ -61,8 +61,8 @@
                             <td><a th:href="@{/read-message(id=${message.id})}" th:text="${message.messageSubject}">Title ...</a></td>
                             <td th:text="${message.userSender}">User sender</td>
                             <td th:text="${message.userRecipient}">Poluchatel</td>
-                        <td th:text="${message.date}">Data i chas</td>
-                            <td><a th:href="@{/delete-message(id=${message.id})}"><img src="images/delete.png" width="25px" title="Изтрии съобщението..."/> </a></td>
+                        <td th:text="${message.dateAndTime}">Data i chas</td>
+                            <td><a th:href="@{/delete-conversation(id=${message.id})}"><img src="images/delete.png" width="25px" title="Изтрии съобщението..."/> </a></td>
                         </tr>
                         </tbody>
                         </table>

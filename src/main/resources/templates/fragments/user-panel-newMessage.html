@@ -59,7 +59,7 @@
                                         <div class="form-group">
                                             <div id="senderEmail">
                                             <input type="text" name="userSender" id="userSender" class="form-control" th:value="${#authentication.name}"/>
-                                                <input type="text" name="date" id="date" class="form-control" value=""/>
+                                                <input type="text" name="dateAndTime" id="dateAndTime" class="form-control" value=""/>
                                                 <script>
                                                     n =  new Date();
                                                     y = n.getFullYear();
@@ -72,7 +72,7 @@
                                                     } else {
                                                         m2 = mins;
                                                     }
-                                                    document.getElementById("date").value = d + "/" + m + "/" + y+", "+h+":"+m2;
+                                                    document.getElementById("dateAndTime").value = d + "/" + m + "/" + y+", "+h+":"+m2;
                                                 </script>
                                             </div>
                                         </div>
@@ -82,7 +82,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <textarea class="form-control" th:field="*{messageText}" placeholder="Съобщение"  required="required" style="width: 100%; height: 150px;"></textarea>
+                                            <textarea class="form-control" id="messageText" name="messageText" placeholder="Съобщение"  required="required" style="width: 100%; height: 150px;"></textarea>
                                         </div>
                                     </div>
                                 </div>
