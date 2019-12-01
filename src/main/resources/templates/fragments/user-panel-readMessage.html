@@ -74,7 +74,7 @@
                                 <form th:action="@{/read-message}" method="post" th:object="${replymsg}">
                                     <div id="senderEmail">
                                         <input type="text" name="dateAndTime" id="dateAndTime" class="form-control" value=""/>
-                                        <input type="text" name="userSender" id="userSender" class="form-control" th:value="${#authentication.name}"/>
+<!--                                        <input type="text" name="userSender" id="userSender" class="form-control" th:value="${#authentication.name}"/>-->
                                         <script>
                                             n =  new Date();
                                             y = n.getFullYear();
