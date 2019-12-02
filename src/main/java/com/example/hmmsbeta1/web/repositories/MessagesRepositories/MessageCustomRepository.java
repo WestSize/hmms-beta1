@@ -1,4 +1,4 @@
-package com.example.hmmsbeta1.web.repositories;
+package com.example.hmmsbeta1.web.repositories.MessagesRepositories;
 
 import java.util.List;
 

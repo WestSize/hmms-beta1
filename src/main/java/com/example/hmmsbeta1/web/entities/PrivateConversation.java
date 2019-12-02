@@ -13,17 +13,16 @@ public class PrivateConversation {
     private String messageSubject;
     @Column(nullable = false)
     private String userSender;
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "recipient_id")
-//    private User userRecipient;
     @Column(nullable = false)
     private String userRecipient;
-//    @Column
-//    private String messageText;
     @OneToMany(mappedBy="privateConversation", cascade = CascadeType.ALL)
     private Set<Message> messages;
     @Column
     private String dateAndTime;
+    @Column
+    private int isSenderSeen;
+    @Column
+    private int isRecipientSeen;
 
     public PrivateConversation() {
     }
@@ -74,5 +73,21 @@ public class PrivateConversation {
 
     public void setUserRecipient(String userRecipient) {
         this.userRecipient = userRecipient;
+    }
+
+    public int getIsSenderSeen() {
+        return isSenderSeen;
+    }
+
+    public void setIsSenderSeen(int isSenderSeen) {
+        this.isSenderSeen = isSenderSeen;
+    }
+
+    public int getIsRecipientSeen() {
+        return isRecipientSeen;
+    }
+
+    public void setIsRecipientSeen(int isRecipientSeen) {
+        this.isRecipientSeen = isRecipientSeen;
     }
 }

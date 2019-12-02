@@ -60,4 +60,8 @@ public class UserPrincipal implements UserDetails {
     }
 
     public String getLastName() { return this.user.getLastName();}
+
+    public int getUnreadedMessages(){
+        return this.user.getUnreadedMessages();
+    }
 }

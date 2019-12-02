@@ -64,7 +64,6 @@
                                         </div>
                                         <div class="form-group">
                                             <div id="senderEmail">
-<!--                                            <input type="text" name="userSender" id="userSender" class="form-control" th:value="${#authentication.name}"/>-->
                                                 <input type="text" name="dateAndTime" id="dateAndTime" class="form-control" value=""/>
                                                 <script>
                                                     n =  new Date();
@@ -73,12 +72,12 @@
                                                     d = n.getDate();
                                                     h = n.getHours();
                                                     mins = n.getMinutes();
-                                                    if(m<10){
-                                                        m2 = "0"+mins;
+                                                    if(mins<10){
+                                                        tochnaData = d + "/" + m + "/" + y+", "+h+":0"+mins;
                                                     } else {
-                                                        m2 = mins;
+                                                        tochnaData = d + "/" + m + "/" + y+", "+h+":"+mins;
                                                     }
-                                                    document.getElementById("dateAndTime").value = d + "/" + m + "/" + y+", "+h+":"+m2;
+                                                    document.getElementById("dateAndTime").value = tochnaData;
                                                 </script>
                                             </div>
                                         </div>

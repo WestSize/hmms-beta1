@@ -1,7 +1,7 @@
-<th:block th:fragment>
+<th:block th:fragment xmlns="http://www.w3.org/1999/html">
     <ul class="nav">
 <li class="nav-item">
-    <a class="nav-link active" th:href="@{/messages}">Съобщения (0)</a>
+    <a class="nav-link active" th:href="@{/messages}">Съобщения (<span th:text="${#authentication.principal.getUnreadedMessages()}"></span>)</a>
 </li>
 <li class="nav-item">
     <a class="nav-link" th:href="@{#}">Моят статус</a>

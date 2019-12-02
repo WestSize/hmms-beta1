@@ -69,12 +69,13 @@
                                     </tr>
                                     </tbody>
                                 </table>
-
+                                <div th:if="${param.sended}">
+                                    <div class="alert alert-info">Вашият отговор беше изпратен :)</div>
+                                </div>
                                 <!-- reply message start -->
                                 <form th:action="@{/read-message}" method="post" th:object="${replymsg}">
                                     <div id="senderEmail">
                                         <input type="text" name="dateAndTime" id="dateAndTime" class="form-control" value=""/>
-<!--                                        <input type="text" name="userSender" id="userSender" class="form-control" th:value="${#authentication.name}"/>-->
                                         <script>
                                             n =  new Date();
                                             y = n.getFullYear();
@@ -82,12 +83,13 @@
                                             d = n.getDate();
                                             h = n.getHours();
                                             mins = n.getMinutes();
-                                            if(m<10){
-                                                m2 = "0"+mins;
+                                            if(mins<10){
+                                                // m2 = '0' +mins;
+                                                tochnaData = d + "/" + m + "/" + y+", "+h+":0"+mins;
                                             } else {
-                                                m2 = mins;
+                                                tochnaData = d + "/" + m + "/" + y+", "+h+":"+mins;
                                             }
-                                            document.getElementById("dateAndTime").value = d + "/" + m + "/" + y+", "+h+":"+m2;
+                                            document.getElementById("dateAndTime").value = tochnaData;
                                         </script>
                                     </div>
                                 <textarea class="form-control" placeholder="Отговор..." rows="10" cols="10" name="messageText" id="messageText" required></textarea>

@@ -17,15 +17,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
-
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
 
+
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(registration.getEmail());
         user.setPassword(passwordEncoder.encode(registration.getPassword()));
         user.setRoles(Arrays.asList(new Role("ROLE_USER")));
+        user.setUnreadedMessages(0);
         return userRepository.save(user);
     }
 
@@ -51,6 +53,7 @@ public class UserServiceImpl implements UserService {
                 user.getPassword(),
                 mapRolesToAuthorities(user.getRoles()));
     }
+
 
     private Collection < ? extends GrantedAuthority > mapRolesToAuthorities(Collection < Role > roles) {
         return roles.stream()
