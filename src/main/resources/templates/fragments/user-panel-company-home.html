@@ -1,0 +1,133 @@
+<th:block th:fragment>
+
+
+    <div class="container bootstrap snippet">
+        <div class="row">
+            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1></div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-3"><!--left col-->
+
+
+                <div class="text-center">
+                    <img src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" class="avatar img-circle img-thumbnail" alt="avatar">
+                    <h6>Upload a different photo...</h6>
+                    <input type="file" class="text-center center-block file-upload ">
+                </div></hr><br>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">Website <i class="fa fa-link fa-1x"></i></div>
+                    <div class="panel-body"><a href="http://bootnipets.com">bootnipets.com</a></div>
+                </div>
+
+
+                <ul class="list-group">
+                    <li class="list-group-item text-muted">Activity <i class="fa fa-dashboard fa-1x"></i></li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Likes</strong></span> 13</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Posts</strong></span> 37</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78</li>
+                </ul>
+
+
+
+            </div><!--/col-3-->
+            <div class="col-sm-9">
+
+                <th:block th:include="~{fragments/user-panel-navi}"/>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="home">
+                        <hr>
+                        <div th:switch="${#authentication.principal.getUserWorkingStatus()}">
+                            <span th:case="'guest'">
+                            Вашият работен статус вмомента е: <b>гост</b>. Като гост, Вие можете да комуникирате с потребителите
+                            посредством <a href="/messages">личните съобщения</a>, както и да разглеждате профилите на всички регистрирани
+                            в системата. Можете да промените вашия статус на 'работник', като зададете някоя от регистрираните фирми за ваше работно
+                            място. Също така статусът Ви може да стане на 'Собственик', като регистрирате някоя фирма в системата от менюто по-долу.
+<!--                                Тука тряа да сложа линк на 'някоя от регистрираните фирми' към страница със всички регистрирани фирми в системата-->
+                            </span>
+                            <span th:case="'owner'">
+                            Вашият работен статус вмомента е: <b>собственик</b>. Това е списък със вашите фирми:
+                            <p>
+                                <table class="table">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">Име</th>
+                                                <th scope="col">Описание</th>
+                                                <th scope="col">Брой работници</th>
+                                                <th scope="col">Брой офиси</th>
+                                                <th scope="col">Печалба</th>
+                                                <th scope="col">Опции</th>
+                                            </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="company : ${usercompanies}">
+                                                <td th:text="${company.name}">Име</td>
+                                                <td th:text="${company.description}">Описание</td>
+                                                <td th:text="${company.numberOfWorkers}">Брой работници</td>
+                                                <td th:text="${company.numberOfOffices}">Брой офиси</td>
+                                                <td th:text="${company.profit}">лв</td>
+                                                <td><a th:href="@{/edit-company(id=${company.id})}"><img src="images/delete.png" width="25px" title="Закрий фирмата..."/> </a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </span>
+                            <hr>
+                            <!-- форма за регистриране на нова фирма - СТАРТ -->
+                            <h2 style="color: #BF2E2E;">Регистрирай твоята фирма СЕГА:</h2>
+                            <p>
+                            <p>
+                            <form class="form" th:action="@{/company-home}" th:field="newcompany" method="post">
+                                <div class="form-group">
+                                    <div class="col-xs-6">
+                                        <label for="name"><h4>Име на фирмата:</h4></label>
+                                        <input type="text" class="form-control" required name="name" id="name" value="" placeholder="Въведете име на фирмата" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-6">
+                                        <label for="description"><h4>Описание:</h4></label>
+<!--                                        <input type="text" class="form-control" required name="description" id="description" value="" title="Въведете описание на фирмата (напр. тип на бизнеса)" >-->
+                                        <textarea class="form-control" placeholder="Въведете описание на фирмата (напр. тип на бизнеса)" rows="5" cols="5" name="description" id="description" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-6">
+                                        <label for="investment"><h4>Начално вложение:</h4></label>
+                                        <input type="number" class="form-control" name="investment" required id="investment" value="" placeholder="Въведете началното вложение, което сте направили във фирмата">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-6">
+                                        <label for="income"><h4>Моментен доход:</h4></label>
+                                        <input type="number" class="form-control" name="income" required id="income" value="" placeholder="Въведете дохода, който фирмата е генерирала до момента">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12">
+                                        <br>
+                                        <button class="btn btn-lg btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Добави фирмата</button>
+                                        <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                            <!-- форма за регистриране на нова фирма - КРАЙ -->
+                        <hr>
+                    </div>
+
+
+                </div><!--/tab-pane-->
+
+            </div><!--/tab-content-->
+
+        </div><!--/col-9-->
+    </div><!--/row-->
+
+
+
+
+</th:block>

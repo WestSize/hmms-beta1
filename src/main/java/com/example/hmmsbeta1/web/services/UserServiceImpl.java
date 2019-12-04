@@ -40,6 +40,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(registration.getPassword()));
         user.setRoles(Arrays.asList(new Role("ROLE_USER")));
         user.setUnreadedMessages(0);
+        user.setWorkingStatus("guest");
         return userRepository.save(user);
     }
 

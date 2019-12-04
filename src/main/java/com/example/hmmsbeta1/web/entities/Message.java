@@ -1,5 +1,7 @@
 package com.example.hmmsbeta1.web.entities;
 
+import org.jasypt.util.text.BasicTextEncryptor;
+
 import javax.persistence.*;
 
 @Entity
@@ -66,11 +68,17 @@ public class Message {
     }
 
     public String getMessage() {
-        return messageText;
+        BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+        String decryptedMessage = textEncryptor.decrypt(messageText);
+        return decryptedMessage;
     }
 
     public void setMessage(String message) {
-        this.messageText = message;
+        BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+        String privateMessage = message;
+        textEncryptor.setPasswordCharArray(message.toCharArray());
+        String myEncryptedText = textEncryptor.encrypt(privateMessage);
+        this.messageText = myEncryptedText;
     }
 
     public String getDateAndTime() {

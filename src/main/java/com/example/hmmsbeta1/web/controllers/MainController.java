@@ -2,6 +2,7 @@ package com.example.hmmsbeta1.web.controllers;
 
 
 import com.example.hmmsbeta1.web.entities.User;
+import com.example.hmmsbeta1.web.repositories.UserRepository;
 import com.example.hmmsbeta1.web.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,10 +28,16 @@ public class MainController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView home(Model model, Principal principal){
 //        int userUnreededMsgs = userService.countUnreededMessages(principal.getName());
-
+        model.addAttribute("updateuser", new User());
         return new ModelAndView("home.html");
     }
     @GetMapping("/login")
@@ -42,8 +50,16 @@ public class MainController {
         return "user/index";
     }
 
-    @RequestMapping(value = "update-user", method = RequestMethod.POST)
-    public String updateUser() {
-        return "Your data has been updated!";
+    @RequestMapping(value = "/", method = RequestMethod.POST)
+    public String updateUser(Principal principal, User newUserInfo) {
+        User oldUserInfo = userRepository.findByEmail(principal.getName());
+        oldUserInfo.setFirstName(newUserInfo.getFirstName());
+        oldUserInfo.setLastName(newUserInfo.getLastName());
+        oldUserInfo.setEmail(newUserInfo.getEmail());
+        if(!oldUserInfo.getPassword().equals(newUserInfo.getPassword()) && !newUserInfo.getPassword().equals("")) {
+            oldUserInfo.setPassword(passwordEncoder.encode(newUserInfo.getPassword()));
+        }
+        userRepository.save(oldUserInfo);
+        return "redirect:/?updateok";
     }
 }

@@ -1,5 +1,6 @@
 package com.example.hmmsbeta1.web.controllers;
 
+import com.example.hmmsbeta1.web.dtos.PrivateMessageDto;
 import com.example.hmmsbeta1.web.entities.Message;
 import com.example.hmmsbeta1.web.entities.PrivateConversation;
 import com.example.hmmsbeta1.web.entities.User;
@@ -19,6 +20,7 @@ import java.security.Principal;
 
 @Controller
 public class MessagesController {
+
     @Autowired
     private PrivateMessagesService privateMessagesService;
 

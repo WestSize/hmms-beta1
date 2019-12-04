@@ -64,4 +64,8 @@ public class UserPrincipal implements UserDetails {
     public int getUnreadedMessages(){
         return this.user.getUnreadedMessages();
     }
+
+    public String getUserWorkingStatus(){
+        return this.user.getWorkingStatus();
+    }
 }

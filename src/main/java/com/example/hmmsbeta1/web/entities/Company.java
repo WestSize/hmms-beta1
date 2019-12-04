@@ -1,11 +1,10 @@
 package com.example.hmmsbeta1.web.entities;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity()
 @Table(name = "companies")
-public class Compnay{
+public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -21,15 +20,17 @@ public class Compnay{
     @Column
     private int income;
     @Column
-    private int outcome;
+    private int investment;
     @Column
     private int profit;
-    @Column
-    private int ownerId;
+    @OneToOne
+    @JoinColumn(name="owner_id", nullable = false)
+    private User user;
+
 //    @OneToMany(fetch = FetchType.LAZY, mappedBy = "company")
 //    private List<Worker> workers;
 
-    public Compnay() {
+    public Company() {
     }
 
     public Long getId() {
@@ -80,12 +81,12 @@ public class Compnay{
         this.income = income;
     }
 
-    public int getOutcome() {
-        return outcome;
+    public int getInvestment() {
+        return investment;
     }
 
-    public void setOutcome(int outcome) {
-        this.outcome = outcome;
+    public void setInvestment(int investment) {
+        this.investment = investment;
     }
 
     public int getProfit() {
@@ -96,15 +97,15 @@ public class Compnay{
         this.profit = profit;
     }
 
-    public int getOwnerId() {
-        return ownerId;
+    public User getUser() {
+        return user;
     }
 
-    public void setOwnerId(int ownerId) {
-        this.ownerId = ownerId;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-//    public List<Worker> getWorkers() {
+    //    public List<Worker> getWorkers() {
 //        return workers;
 //    }
 //

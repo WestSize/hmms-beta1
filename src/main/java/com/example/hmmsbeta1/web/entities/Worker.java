@@ -15,6 +15,6 @@ public class Worker {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
-    private Compnay compnay;
+    private Company company;
 
 }

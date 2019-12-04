@@ -18,6 +18,7 @@ public class User {
     private String email;
     private String password;
     private int unreadedMessages;
+    private String workingStatus;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
@@ -33,12 +34,13 @@ public class User {
 
     public User() {}
 
-    public User(String firstName, String lastName, String email, String password, int unreadedMessages) {
+    public User(String firstName, String lastName, String email, String password, int unreadedMessages, String workingStatus) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.unreadedMessages = unreadedMessages;
+        this.workingStatus = workingStatus;
     }
 
     public User(String firstName, String lastName, String email, String password, int unreadedMessages, Collection < Role > roles) {
@@ -104,6 +106,14 @@ public class User {
 
     public void setUnreadedMessages(int unreadedMessages) {
         this.unreadedMessages = unreadedMessages;
+    }
+
+    public String getWorkingStatus() {
+        return workingStatus;
+    }
+
+    public void setWorkingStatus(String workingStatus) {
+        this.workingStatus = workingStatus;
     }
 
     //    public List<Worker> getWorkers() {
