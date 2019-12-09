@@ -1,0 +1,90 @@
+<th:block th:fragment>
+
+
+    <div class="container bootstrap snippet">
+        <div class="row">
+            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1></div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-3"><!--left col-->
+
+
+                <div class="text-center">
+                    <img src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" class="avatar img-circle img-thumbnail" alt="avatar">
+                    <h6>Upload a different photo...</h6>
+                    <input type="file" class="text-center center-block file-upload ">
+                </div></hr><br>
+
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">Website <i class="fa fa-link fa-1x"></i></div>
+                    <div class="panel-body"><a href="http://bootnipets.com">bootnipets.com</a></div>
+                </div>
+
+
+                <ul class="list-group">
+                    <li class="list-group-item text-muted">Activity <i class="fa fa-dashboard fa-1x"></i></li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Likes</strong></span> 13</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Posts</strong></span> 37</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78</li>
+                </ul>
+
+
+
+            </div><!--/col-3-->
+            <div class="col-sm-9">
+
+                <th:block th:include="~{fragments/user-panel-navi}"/>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="home">
+                        <hr>
+                        <!-- инфо за фирмата -- старт -->
+                        <form class="form" th:action="@{/company-page}" th:field="updateCompany" method="post">
+                            <div class="form-group">
+
+                                <div class="col-xs-6">
+                                    <h4>Име на фирмата:</h4>
+                                    <input type="text" class="form-control" required name="name" id="name" th:value="${companyInfo.name}" title="Въведете ново име на фирмата, ако желаете да го промените" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-6">
+                                    <h4>Описание на фирмата:</h4>
+                                    <input type="text" class="form-control" name="description" required id="description" th:value="${companyInfo.description}" title="Въведете ново описание на фирмата, ако желаете да го промените">
+                                </div>
+                            </div>
+                            <p>
+                            <h4>Брой работници:</h4> <span th:text="${companyInfo.numberOfWorkers}"></span> <a href="/workers-list"><img src="images/edit.png" width="12px" title="Редактирай"/></a>
+                            <p>
+                            <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <p>
+                            <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <p>
+                            <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <p>
+                            <h4>Чиста печалба:</h4> <span th:text="${companyInfo.profit}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <br>
+                                    <button class="btn btn-lg btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
+                                    <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
+                                </div>
+                            </div>
+                        </form>
+                        <!-- инфо за фирмата - край -->
+                        <hr>
+                    </div>
+                </div><!--/tab-pane-->
+
+            </div><!--/tab-content-->
+
+        </div><!--/col-9-->
+    </div><!--/row-->
+
+
+
+
+</th:block>

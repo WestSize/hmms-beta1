@@ -63,7 +63,7 @@
                             </div>
                             <div class="col-xs-6">
                                 <label for="email"><h4>Email</h4></label>
-                                <input type="email" class="form-control" name="email" id="email" required th:value="${#authentication.name}" title="enter your email.">
+                                <input type="email" class="form-control" name="email" id="email" required th:value="${#authentication.principal.getEmail()}" title="enter your email.">
                             </div>
 
 

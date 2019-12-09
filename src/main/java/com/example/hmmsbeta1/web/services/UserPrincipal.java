@@ -68,4 +68,12 @@ public class UserPrincipal implements UserDetails {
     public String getUserWorkingStatus(){
         return this.user.getWorkingStatus();
     }
+
+    public String getEmail(){
+        return this.user.getEmail();
+    }
+
+    public Long getId(){
+        return this.user.getId();
+    }
 }
