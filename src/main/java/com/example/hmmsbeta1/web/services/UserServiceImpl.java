@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
         user.setRoles(Arrays.asList(new Role("ROLE_USER")));
         user.setUnreadedMessages(0);
         user.setWorkingStatus("guest");
+        user.setAvatarPath("http://ssl.gstatic.com/accounts/ui/avatar_2x.png");
         return userRepository.save(user);
     }
 

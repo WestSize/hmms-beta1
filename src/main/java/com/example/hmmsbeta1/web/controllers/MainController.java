@@ -18,13 +18,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Controller
 public class MainController {
@@ -37,6 +37,8 @@ public class MainController {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    public static String uploadDirectory = System.getProperty("user.dir")+"/uploads/avatars";
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView home(Model model, Principal principal){
@@ -73,7 +75,24 @@ public class MainController {
         if(!oldUserInfo.getPassword().equals(newUserInfo.getPassword()) && !newUserInfo.getPassword().equals("")) {
             oldUserInfo.setPassword(passwordEncoder.encode(newUserInfo.getPassword()));
         }
+        oldUserInfo.setAge(newUserInfo.getAge());
+        oldUserInfo.setFacebookPage(newUserInfo.getFacebookPage());
+        oldUserInfo.setDescription(newUserInfo.getDescription());
         userRepository.save(oldUserInfo);
         return "redirect:/?updateok";
+    }
+
+    @RequestMapping(value = "/uploadAvatar", method = RequestMethod.POST)
+    public String uploadAvatar(@RequestParam("avatarPath")String avatarPath, Principal principal) throws IOException {
+        User user = userService.findByEmail(principal.getName());
+        user.setAvatarPath(avatarPath);
+        userRepository.save(user);
+        return "redirect:/";
+    }
+
+    @RequestMapping(value = "/user-page", method = RequestMethod.GET)
+    public String viewUserPage(Long id, Model model){
+        model.addAttribute("userinfo", userRepository.getOne(id));
+        return "/user-page";
     }
 }

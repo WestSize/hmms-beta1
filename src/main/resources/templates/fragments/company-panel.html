@@ -3,7 +3,9 @@
 
     <div class="container bootstrap snippet">
         <div class="row">
-            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1></div>
+            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span
+                    th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1>
+            </div>
 
         </div>
         <div class="row">
@@ -11,10 +13,20 @@
 
 
                 <div class="text-center">
-                    <img src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" class="avatar img-circle img-thumbnail" alt="avatar">
-                    <h6>Upload a different photo...</h6>
-                    <input type="file" class="text-center center-block file-upload ">
-                </div></hr><br>
+                    <img th:src="@{${#authentication.principal.getAvatarPath()}}"
+                         class="avatar img-circle img-thumbnail" alt="avatar" width="192px">
+                    <h6>Поставете линк към изображение, за да смените аватара си</h6>
+                    <form action="/uploadAvatar" method="post" enctype="multipart/form-data">
+                        <input class="form-control input-sm" type="url" id="avatarPath" name="avatarPath">
+                        <p>
+                        <p>
+                        <p>
+                            <button class="btn btn-sm btn-success" type="submit"><i
+                                    class="glyphicon glyphicon-ok-sign"></i> Save
+                            </button>
+                    </form>
+                </div>
+                </hr><br>
 
 
                 <div class="panel panel-default">
@@ -25,12 +37,13 @@
 
                 <ul class="list-group">
                     <li class="list-group-item text-muted">Activity <i class="fa fa-dashboard fa-1x"></i></li>
-                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125
+                    </li>
                     <li class="list-group-item text-right"><span class="pull-left"><strong>Likes</strong></span> 13</li>
                     <li class="list-group-item text-right"><span class="pull-left"><strong>Posts</strong></span> 37</li>
-                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78
+                    </li>
                 </ul>
-
 
 
             </div><!--/col-3-->
@@ -44,33 +57,56 @@
                         <!-- инфо за фирмата -- старт -->
                         <form class="form" th:action="@{/company-page}" th:field="updateCompany" method="post">
                             <div class="form-group">
-
                                 <div class="col-xs-6">
                                     <h4>Име на фирмата:</h4>
-                                    <input type="text" class="form-control" required name="name" id="name" th:value="${companyInfo.name}" title="Въведете ново име на фирмата, ако желаете да го промените" >
+                                    <input type="text" class="form-control" required name="name" id="name"
+                                           th:value="${companyInfo.name}"
+                                           title="Въведете ново име на фирмата, ако желаете да го промените">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="col-xs-6">
                                     <h4>Описание на фирмата:</h4>
-                                    <input type="text" class="form-control" name="description" required id="description" th:value="${companyInfo.description}" title="Въведете ново описание на фирмата, ако желаете да го промените">
+                                    <input type="text" class="form-control" name="description" required id="description"
+                                           th:value="${companyInfo.description}"
+                                           title="Въведете ново описание на фирмата, ако желаете да го промените">
+                                    <!--                                    <textarea style="width: 100%; height: 150px;" type="text" class="form-control" name="description" required id="description" th:value="${companyInfo.description}" title="Въведете ново описание на фирмата, ако желаете да го промените"></textarea>-->
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-6">
+                                    <h4>Телефонен номер на фирмата:</h4>
+                                    <input type="text" class="form-control" name="phoneNumber" required id="phoneNumber"
+                                           th:value="${companyInfo.phoneNumber}"
+                                           title="Въведете телефонен номер на фирмата">
                                 </div>
                             </div>
                             <p>
-                            <h4>Брой работници:</h4> <span th:text="${companyInfo.numberOfWorkers}"></span> <a href="/workers-list"><img src="images/edit.png" width="12px" title="Редактирай"/></a>
+                            <h4>Брой работници:</h4> <span th:text="${companyInfo.numberOfWorkers}"></span> <a
+                                th:href="@{/workers-list(id=${companyInfo.getId()})}"><img src="images/edit.png"
+                                                                                           width="12px"
+                                                                                           title="Редактирай"/></a>
                             <p>
-                            <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img
+                                src="images/edit.png" width="12px" title="Редактирай"/>
                             <p>
-                            <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img
+                                src="images/edit.png" width="12px" title="Редактирай"/>
                             <p>
-                            <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> <img
+                                src="images/edit.png" width="12px" title="Редактирай"/>
                             <p>
-                            <h4>Чиста печалба:</h4> <span th:text="${companyInfo.profit}"></span> <img src="images/edit.png" width="12px" title="Редактирай"/>
+                            <h4>Чиста печалба:</h4> <span th:text="${companyInfo.profit}"></span> <img
+                                src="images/edit.png" width="12px" title="Редактирай"/>
                             <div class="form-group">
                                 <div class="col-xs-12">
                                     <br>
-                                    <button class="btn btn-lg btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
-                                    <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
+                                    <button class="btn btn-lg btn-success" type="submit"><i
+                                            class="glyphicon glyphicon-ok-sign"></i> Save
+                                    </button>
+                                    <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i>
+                                        Reset
+                                    </button>
                                 </div>
                             </div>
                         </form>
@@ -83,8 +119,6 @@
 
         </div><!--/col-9-->
     </div><!--/row-->
-
-
 
 
 </th:block>

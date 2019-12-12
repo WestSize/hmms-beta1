@@ -19,6 +19,10 @@ public class User {
     private String password;
     private int unreadedMessages;
     private String workingStatus;
+    private String avatarPath;
+    private int age;
+    private String facebookPage;
+    private String description;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
@@ -34,13 +38,17 @@ public class User {
 
     public User() {}
 
-    public User(String firstName, String lastName, String email, String password, int unreadedMessages, String workingStatus) {
+    public User(String firstName, String lastName, String email, String password, int unreadedMessages, String workingStatus, String avatarPath, int age, String facebookPage, String description) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.unreadedMessages = unreadedMessages;
         this.workingStatus = workingStatus;
+        this.avatarPath = avatarPath;
+        this.age = age;
+        this.facebookPage = facebookPage;
+        this.description = description;
     }
 
     public User(String firstName, String lastName, String email, String password, int unreadedMessages, Collection < Role > roles) {
@@ -114,6 +122,38 @@ public class User {
 
     public void setWorkingStatus(String workingStatus) {
         this.workingStatus = workingStatus;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getFacebookPage() {
+        return facebookPage;
+    }
+
+    public void setFacebookPage(String facebookPage) {
+        this.facebookPage = facebookPage;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     //    public List<Worker> getWorkers() {

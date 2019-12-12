@@ -11,7 +11,8 @@ public class Company {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
-    @Column(name = "description", nullable = false)
+    @Lob
+    @Column(name = "description", nullable = false, length = 512)
     private String description;
     @Column
     private int numberOfWorkers;
@@ -26,6 +27,11 @@ public class Company {
     @OneToOne
     @JoinColumn(name="owner_id", nullable = false)
     private User user;
+    @Column
+    private String phoneNumber;
+    @Lob
+    @Column(name = "circular_letter", nullable = false, length = 512)
+    private String circularLetter;
 
 //    @OneToMany(fetch = FetchType.LAZY, mappedBy = "company")
 //    private List<Worker> workers;
@@ -103,6 +109,22 @@ public class Company {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getCircularLetter() {
+        return circularLetter;
+    }
+
+    public void setCircularLetter(String circularLetter) {
+        this.circularLetter = circularLetter;
     }
 
     //    public List<Worker> getWorkers() {

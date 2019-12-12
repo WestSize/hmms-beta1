@@ -19,6 +19,8 @@ public class Application {
     private boolean approved;
     @Column(name="invited")
     private boolean invited;
+    @Column(name="candidate_tel")
+    private int candidateTelephoneNum;
 
     public Application() {
     }
@@ -69,5 +71,13 @@ public class Application {
 
     public void setInvited(boolean invited) {
         this.invited = invited;
+    }
+
+    public int getCandidateTelephoneNum() {
+        return candidateTelephoneNum;
+    }
+
+    public void setCandidateTelephoneNum(int candidateTelephoneNum) {
+        this.candidateTelephoneNum = candidateTelephoneNum;
     }
 }

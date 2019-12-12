@@ -76,4 +76,21 @@ public class UserPrincipal implements UserDetails {
     public Long getId(){
         return this.user.getId();
     }
+
+    public String getAvatarPath(){
+        return this.user.getAvatarPath();
+    }
+
+    public int getAge(){
+        return this.user.getAge();
+    }
+
+    public String getFacebookPage(){
+        return this.user.getFacebookPage();
+    }
+
+    public String getDescription(){
+        return this.user.getDescription();
+    }
+
 }

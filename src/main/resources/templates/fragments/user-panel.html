@@ -3,7 +3,9 @@
 
     <div class="container bootstrap snippet">
         <div class="row">
-            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1></div>
+            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span
+                    th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1>
+            </div>
 
         </div>
         <div class="row">
@@ -11,10 +13,20 @@
 
 
                 <div class="text-center">
-                    <img src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" class="avatar img-circle img-thumbnail" alt="avatar">
-                    <h6>Upload a different photo...</h6>
-                    <input type="file" class="text-center center-block file-upload ">
-                </div></hr><br>
+                    <img th:src="@{${#authentication.principal.getAvatarPath()}}"
+                         class="avatar img-circle img-thumbnail" alt="avatar" width="192px">
+                    <h6>Поставете линк към изображение, за да смените аватара си</h6>
+                    <form action="/uploadAvatar" method="post" enctype="multipart/form-data">
+                        <input class="form-control input-sm" type="url" id="avatarPath" name="avatarPath">
+                        <p>
+                        <p>
+                        <p>
+                            <button class="btn btn-sm btn-success" type="submit"><i
+                                    class="glyphicon glyphicon-ok-sign"></i> Save
+                            </button>
+                    </form>
+                </div>
+                </hr><br>
 
 
                 <div class="panel panel-default">
@@ -25,12 +37,13 @@
 
                 <ul class="list-group">
                     <li class="list-group-item text-muted">Activity <i class="fa fa-dashboard fa-1x"></i></li>
-                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125
+                    </li>
                     <li class="list-group-item text-right"><span class="pull-left"><strong>Likes</strong></span> 13</li>
                     <li class="list-group-item text-right"><span class="pull-left"><strong>Posts</strong></span> 37</li>
-                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78
+                    </li>
                 </ul>
-
 
 
             </div><!--/col-3-->
@@ -46,75 +59,98 @@
                             <div class="alert alert-info">Вие променихте данните си успешно!</div>
                         </div>
                         <form class="form" th:action="@{/}" th:field="updateuser" method="post">
-<!--                            <form class="form" th:action="@{/}" th:object="${update-user}" method="post">-->
+                            <!--                            <form class="form" th:action="@{/}" th:object="${update-user}" method="post">-->
                             <div class="form-group">
 
                                 <div class="col-xs-6">
                                     <label for="last_name"><h4>First name</h4></label>
-                                    <input type="text" class="form-control" required name="firstName" id="firstName" th:value="${#authentication.principal.getFirstName()}" title="enter your first name if any." >
+                                    <input type="text" class="form-control" required name="firstName" id="firstName"
+                                           th:value="${#authentication.principal.getFirstName()}"
+                                           title="enter your first name if any.">
                                 </div>
                             </div>
                             <div class="form-group">
 
                                 <div class="col-xs-6">
                                     <label for="last_name"><h4>Last name</h4></label>
-                                    <input type="text" class="form-control" name="lastName" required id="lastName" th:value="${#authentication.principal.getLastName()}" title="enter your last name if any.">
+                                    <input type="text" class="form-control" name="lastName" required id="lastName"
+                                           th:value="${#authentication.principal.getLastName()}"
+                                           title="enter your last name if any.">
                                 </div>
                             </div>
                             <div class="col-xs-6">
                                 <label for="email"><h4>Email</h4></label>
-                                <input type="email" class="form-control" name="email" id="email" required th:value="${#authentication.principal.getEmail()}" title="enter your email.">
+                                <input type="email" class="form-control" name="email" id="email" required
+                                       th:value="${#authentication.principal.getEmail()}" title="enter your email.">
                             </div>
-
-
                             <div class="form-group">
 
-                        <div class="col-xs-6">
-                            <label for="password"><h4>Password</h4></label>
-                            <input type="password" class="form-control" name="password" id="password" value="" title="enter your password.">
-                        </div>
-                    </div>
-                    <div class="form-group">
+                                <div class="col-xs-6">
+                                    <label for="password"><h4>Password</h4></label>
+                                    <input type="password" class="form-control" name="password" id="password" value=""
+                                           title="enter your password.">
+                                </div>
+                            </div>
+                            <div class="form-group">
 
-                        <div class="col-xs-6">
-                            <label for="password2"><h4>Verify password</h4></label>
-                            <input type="password" class="form-control" name="confirm_password" id="confirm_password" value="" title="Confirm your password.">
-                        </div>
-                        <script>
-                            var password = document.getElementById("password")
-                                , confirm_password = document.getElementById("confirm_password");
+                                <div class="col-xs-6">
+                                    <label for="password2"><h4>Verify password</h4></label>
+                                    <input type="password" class="form-control" name="confirm_password"
+                                           id="confirm_password" value="" title="Confirm your password.">
+                                </div>
+                                <script>
+                                    var password = document.getElementById("password")
+                                        , confirm_password = document.getElementById("confirm_password");
 
-                            function validatePassword(){
-                                if(password.value != confirm_password.value) {
-                                    confirm_password.setCustomValidity("Passwords Don't Match");
-                                } else {
-                                    confirm_password.setCustomValidity('');
-                                }
-                            }
+                                    function validatePassword() {
+                                        if (password.value != confirm_password.value) {
+                                            confirm_password.setCustomValidity("Passwords Don't Match");
+                                        } else {
+                                            confirm_password.setCustomValidity('');
+                                        }
+                                    }
 
-                            password.onchange = validatePassword;
-                            confirm_password.onkeyup = validatePassword;
-                        </script>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-xs-12">
-                            <br>
-                            <button class="btn btn-lg btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
-                            <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
-                        </div>
-                    </div>
-                    </form>
+                                    password.onchange = validatePassword;
+                                    confirm_password.onkeyup = validatePassword;
+                                </script>
+                            </div>
+                            <div class="col-xs-6">
+                                <label for="age"><h4>Age</h4></label>
+                                <input type="number" class="form-control" name="age" id="age" required
+                                       th:value="${#authentication.principal.getAge()}" title="enter your age.">
+                            </div>
+                            <div class="col-xs-6">
+                                <label for="age"><h4>Facebook page</h4></label>
+                                <input type="url" class="form-control" name="facebookPage" id="facebookPage"
+                                       th:value="${#authentication.principal.getFacebookPage()}"
+                                       title="enter your facebook page link">
+                            </div>
+                            <div class="col-xs-6">
+                                <label for="age"><h4>Description</h4></label>
+                                <!--                    <input type="url" class="form-control" name="description" id="description" th:value="${#authentication.principal.getDescription()}" title="enter your description">-->
+                                <textarea class="form-control" required="required" style="width: 100%; height: 150px;"
+                                          name="description" id="description"
+                                          th:text="${#authentication.principal.getDescription()}"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <br>
+                                    <button class="btn btn-lg btn-success" type="submit"><i
+                                            class="glyphicon glyphicon-ok-sign"></i> Save
+                                    </button>
+                                    <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i>
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
 
-                    <hr>
+                        <hr>
 
-                </div><!--/tab-pane-->
+                    </div><!--/tab-pane-->
 
-            </div><!--/tab-content-->
+                </div><!--/tab-content-->
 
-        </div><!--/col-9-->
-    </div><!--/row-->
-
-
-
-
+            </div><!--/col-9-->
+        </div><!--/row-->
 </th:block>

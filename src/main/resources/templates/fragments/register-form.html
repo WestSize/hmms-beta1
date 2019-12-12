@@ -4,7 +4,8 @@
 
             <div th:if="${param.success}">
                 <div class="alert alert-info">You've successfully registered
-                    to our awesome app!</div>
+                    to our awesome app!
+                </div>
             </div>
             <div class="card">
                 <header class="card-header">
@@ -16,10 +17,11 @@
                         <p class="error-message" th:if="${#fields.hasGlobalErrors()}"
                            th:each="error : ${#fields.errors('global')}" th:text="${error}">Validation
                             error</p>
-                        <div class="form-row" >
-                            <div class="col form-group" th:classappend="${#fields.hasErrors('firstName')}? 'has-error':''">
+                        <div class="form-row">
+                            <div class="col form-group"
+                                 th:classappend="${#fields.hasErrors('firstName')}? 'has-error':''">
                                 <label>First name </label>
-                                <input id="firstName" class="form-control" th:field="*{firstName}" />
+                                <input id="firstName" class="form-control" th:field="*{firstName}"/>
                                 <p class="error-message"
                                    th:each="error: ${#fields.errors('firstName')}"
                                    th:text="${error}">Validation error</p>
@@ -27,7 +29,7 @@
                             <div class="col form-group"
                                  th:classappend="${#fields.hasErrors('lastName')}? 'has-error':''">
                                 <label>Last name</label>
-                                <input id="lastName" class="form-control" th:field="*{lastName}" />
+                                <input id="lastName" class="form-control" th:field="*{lastName}"/>
                                 <p class="error-message"
                                    th:each="error : ${#fields.errors('lastName')}"
                                    th:text="${error}">Validation error</p>
@@ -36,7 +38,7 @@
                         <div class="form-group"
                              th:classappend="${#fields.hasErrors('email')}? 'has-error':''">
                             <label>Email address</label>
-                            <input id="email" type="email" class="form-control" th:field="*{email}" />
+                            <input id="email" type="email" class="form-control" th:field="*{email}"/>
                             <p class="error-message"
                                th:each="error : ${#fields.errors('email')}" th:text="${error}">Validation
                                 error</p>
@@ -46,7 +48,7 @@
                         <div class="form-group"
                              th:classappend="${#fields.hasErrors('confirmEmail')}? 'has-error':''">
                             <label>Confirm email</label>
-                            <input id="confirmEmail" type="email" class="form-control" th:field="*{confirmEmail}" />
+                            <input id="confirmEmail" type="email" class="form-control" th:field="*{confirmEmail}"/>
                             <p class="error-message"
                                th:each="error : ${#fields.errors('confirmEmail')}"
                                th:text="${error}">Validation error</p>
@@ -55,7 +57,7 @@
                              th:classappend="${#fields.hasErrors('password')}? 'has-error':''">
                             <label>Password</label>
                             <input id="password" class="form-control" type="password"
-                                   th:field="*{password}" />
+                                   th:field="*{password}"/>
                             <p class="error-message"
                                th:each="error : ${#fields.errors('password')}"
                                th:text="${error}">Validation error</p>
@@ -63,14 +65,15 @@
                         <div class="form-group"
                              th:classappend="${#fields.hasErrors('confirmPassword')}? 'has-error':''">
                             <label>Confirm password</label>
-                            <input id="confirmPassword" class="form-control" type="password" th:field="*{confirmPassword}" />
+                            <input id="confirmPassword" class="form-control" type="password"
+                                   th:field="*{confirmPassword}"/>
                             <p class="error-message"
                                th:each="error : ${#fields.errors('confirmPassword')}"
                                th:text="${error}">Validation error</p>
                         </div> <!-- form-group end.// -->
                         <div class="form-group"
                              th:classappend="${#fields.hasErrors('terms')}? 'has-error':''">
-                            <input id="terms" type="checkbox" th:field="*{terms}" />   <label
+                            <input id="terms" type="checkbox" th:field="*{terms}"/> <label
                                 class="control-label" for="terms"> I agree with the <a
                                 href="#">terms and conditions</a> for Registration.
                         </label>
@@ -90,8 +93,6 @@
         </div> <!-- col.//-->
 
     </div> <!-- row.//-->
-
-
 
 
 </th:block>

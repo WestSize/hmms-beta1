@@ -3,7 +3,9 @@
 
     <div class="container bootstrap snippet">
         <div class="row">
-            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1></div>
+            <div class="col-sm-10" sec:authorize="isAuthenticated()"><h1>Здравейте, <span
+                    th:text="${#authentication.principal.getFirstName()}">Welcome to our grocery store!</span>! </h1>
+            </div>
 
         </div>
         <div class="row">
@@ -11,10 +13,20 @@
 
 
                 <div class="text-center">
-                    <img src="http://ssl.gstatic.com/accounts/ui/avatar_2x.png" class="avatar img-circle img-thumbnail" alt="avatar">
-                    <h6>Upload a different photo...</h6>
-                    <input type="file" class="text-center center-block file-upload ">
-                </div></hr><br>
+                    <img th:src="@{${#authentication.principal.getAvatarPath()}}"
+                         class="avatar img-circle img-thumbnail" alt="avatar" width="192px">
+                    <h6>Поставете линк към изображение, за да смените аватара си</h6>
+                    <form action="/uploadAvatar" method="post" enctype="multipart/form-data">
+                        <input class="form-control input-sm" type="url" id="avatarPath" name="avatarPath">
+                        <p>
+                        <p>
+                        <p>
+                            <button class="btn btn-sm btn-success" type="submit"><i
+                                    class="glyphicon glyphicon-ok-sign"></i> Save
+                            </button>
+                    </form>
+                </div>
+                </hr><br>
 
 
                 <div class="panel panel-default">
@@ -25,12 +37,13 @@
 
                 <ul class="list-group">
                     <li class="list-group-item text-muted">Activity <i class="fa fa-dashboard fa-1x"></i></li>
-                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Shares</strong></span> 125
+                    </li>
                     <li class="list-group-item text-right"><span class="pull-left"><strong>Likes</strong></span> 13</li>
                     <li class="list-group-item text-right"><span class="pull-left"><strong>Posts</strong></span> 37</li>
-                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78</li>
+                    <li class="list-group-item text-right"><span class="pull-left"><strong>Followers</strong></span> 78
+                    </li>
                 </ul>
-
 
 
             </div><!--/col-3-->
@@ -49,69 +62,77 @@
                         </div>
 
                         <table class="table">
-                        <thead class="thead-dark">
-                        <tr>
-                            <th scope="col">Статус</th>
-                            <th scope="col">Заглавие</th>
-                            <th scope="col">Подател</th>
-                            <th scope="col">Получател</th>
-                            <th scope="col">Дата и час</th>
-                            <th scope="col">Опции</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="message : ${messages}">
-                            <div th:if="${message.isRecipientSeen== 0}">
-                               <div th:switch="${message.userRecipient}">
-                                   <!-- ako imeto na poluchatelq e sushtoto -->
-                                   <div th:case="${#authentication.name}">
-<!--                                 <div th:if="${#authentication.name==${message.userCecipient}}">-->
-                                   <td><img src="images/new.png" width="12px" title="Ново съобщение"/></td>
-                                   <td><a th:href="@{/read-message(id=${message.id})}" th:text="${message.messageSubject}"><b>Title ...</b></a></td>
-                                   <td th:text="${message.userSender}"><b>User sender</b></td>
-                                   <td th:text="${message.userRecipient}"><b>Poluchatel</b></td>
-                                   <td th:text="${message.dateAndTime}"><b>Data i chas</b></td>
-                                   <td><a th:href="@{/delete-conversation(id=${message.id})}"><img src="images/delete.png" width="25px" title="Изтрии съобщението..."/> </a></td>
-                                   </div>
-                                   <!-- i ako imeto nee sushtoto -->
-                                    <div th:case="*">
-                                        <td><img src="images/readed.png" width="12px" title="Прочетено съобщение"/></td>
-                                        <td><a th:href="@{/read-message(id=${message.id})}" th:text="${message.messageSubject}">Title ...</a></td>
-                                        <td th:text="${message.userSender}">User sender</td>
-                                        <td th:text="${message.userRecipient}">Poluchatel</td>
-                                        <td th:text="${message.dateAndTime}">Data i chas</td>
-                                        <td><a th:href="@{/delete-conversation(id=${message.id})}"><img src="images/delete.png" width="25px" title="Изтрии съобщението..."/> </a></td>
+                            <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">Статус</th>
+                                <th scope="col">Заглавие</th>
+                                <th scope="col">Подател</th>
+                                <th scope="col">Получател</th>
+                                <th scope="col">Дата и час</th>
+                                <th scope="col">Опции</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="message : ${messages}">
+                                <div th:if="${message.isRecipientSeen== 0}">
+                                    <div th:switch="${message.userRecipient}">
+                                        <!-- ako imeto na poluchatelq e sushtoto -->
+                                        <div th:case="${#authentication.name}">
+                                            <!--                                 <div th:if="${#authentication.name==${message.userCecipient}}">-->
+                                            <td><img src="images/new.png" width="12px" title="Ново съобщение"/></td>
+                                            <td><a th:href="@{/read-message(id=${message.id})}"
+                                                   th:text="${message.messageSubject}"><b>Title ...</b></a></td>
+                                            <td th:text="${message.userSender}"><b>User sender</b></td>
+                                            <td th:text="${message.userRecipient}"><b>Poluchatel</b></td>
+                                            <td th:text="${message.dateAndTime}"><b>Data i chas</b></td>
+                                            <td><a th:href="@{/delete-conversation(id=${message.id})}"><img
+                                                    src="images/delete.png" width="25px" title="Изтрии съобщението..."/>
+                                            </a></td>
+                                        </div>
+                                        <!-- i ako imeto nee sushtoto -->
+                                        <div th:case="*">
+                                            <td><img src="images/readed.png" width="12px" title="Прочетено съобщение"/>
+                                            </td>
+                                            <td><a th:href="@{/read-message(id=${message.id})}"
+                                                   th:text="${message.messageSubject}">Title ...</a></td>
+                                            <td th:text="${message.userSender}">User sender</td>
+                                            <td th:text="${message.userRecipient}">Poluchatel</td>
+                                            <td th:text="${message.dateAndTime}">Data i chas</td>
+                                            <td><a th:href="@{/delete-conversation(id=${message.id})}"><img
+                                                    src="images/delete.png" width="25px" title="Изтрии съобщението..."/>
+                                            </a></td>
+                                        </div>
                                     </div>
-                               </div>
-                            </div>
-                            <div th:if="${message.isRecipientSeen== 1}">
-                                <td><img src="images/readed.png" width="12px" title="Прочетено съобщение"/></td>
-                                <td><a th:href="@{/read-message(id=${message.id})}" th:text="${message.messageSubject}">Title ...</a></td>
-                                <td th:text="${message.userSender}">User sender</td>
-                                <td th:text="${message.userRecipient}">Poluchatel</td>
-                                <td th:text="${message.dateAndTime}">Data i chas</td>
-                                <td><a th:href="@{/delete-conversation(id=${message.id})}"><img src="images/delete.png" width="25px" title="Изтрии съобщението..."/> </a></td>
-                            </div>
-                        </tr>
-                        </tbody>
+                                </div>
+                                <div th:if="${message.isRecipientSeen== 1}">
+                                    <td><img src="images/readed.png" width="12px" title="Прочетено съобщение"/></td>
+                                    <td><a th:href="@{/read-message(id=${message.id})}"
+                                           th:text="${message.messageSubject}">Title ...</a></td>
+                                    <td th:text="${message.userSender}">User sender</td>
+                                    <td th:text="${message.userRecipient}">Poluchatel</td>
+                                    <td th:text="${message.dateAndTime}">Data i chas</td>
+                                    <td><a th:href="@{/delete-conversation(id=${message.id})}"><img
+                                            src="images/delete.png" width="25px" title="Изтрии съобщението..."/> </a>
+                                    </td>
+                                </div>
+                            </tr>
+                            </tbody>
                         </table>
-                    <hr>
+                        <hr>
                         <p>
-                            <p>
+                        <p>
 
 
-                        <a th:href="@{/new-message}" class="btn btn-lg btn-success" role="button">Ново съобщение</a>
+                            <a th:href="@{/new-message}" class="btn btn-lg btn-success" role="button">Ново съобщение</a>
                         <hr>
 
 
-                </div><!--/tab-pane-->
+                    </div><!--/tab-pane-->
 
-            </div><!--/tab-content-->
+                </div><!--/tab-content-->
 
-        </div><!--/col-9-->
-    </div><!--/row-->
-
-
+            </div><!--/col-9-->
+        </div><!--/row-->
 
 
 </th:block>

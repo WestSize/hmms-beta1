@@ -1,16 +1,17 @@
 <th:block th:fragment xmlns="http://www.w3.org/1999/html">
     <ul class="nav">
-<li class="nav-item">
-    <a class="nav-link active" th:href="@{/}">Личен профил</a>
-</li>
-<li class="nav-item" th:if="${#authentication.principal.getUnreadedMessages()> 0}">
-    <a class="nav-link active" href="/messages"><img src="images/new.png" width="12px" title="Имаш ново съобщение!"/> Съобщения</a>
-</li>
-<li class="nav-item" th:if="${#authentication.principal.getUnreadedMessages()== 0}">
-    <a class="nav-link active" href="/messages" title="Нямате нови съобщения">Съобщения</a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" th:href="@{/company-home}">Работно място</a>
-</li>
+        <li class="nav-item">
+            <a class="nav-link active" th:href="@{/}">Личен профил</a>
+        </li>
+        <li class="nav-item" th:if="${#authentication.principal.getUnreadedMessages()> 0}">
+            <a class="nav-link active" href="/messages"><img src="images/new.png" width="12px"
+                                                             title="Имаш ново съобщение!"/> Съобщения</a>
+        </li>
+        <li class="nav-item" th:if="${#authentication.principal.getUnreadedMessages()== 0}">
+            <a class="nav-link active" href="/messages" title="Нямате нови съобщения">Съобщения</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/company-home}">Работно място</a>
+        </li>
     </ul>
 </th:block>

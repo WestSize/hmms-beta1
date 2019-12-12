@@ -24,4 +24,12 @@ public class CompanyCustomRepositoryImpl implements CompanyCustomRepository{
         query.setParameter(1, userId);
         return query.getResultList();
     }
+
+    @Override
+    public Company showOneUserCompany(String email) {
+        Query query = entityManager.createNativeQuery("SELECT * FROM companies as em where em.owner_id LIKE ?", Company.class);
+        Long userId = userRepository.findByEmail(email).getId();
+        query.setParameter(1, userId);
+        return (Company) query.getSingleResult();
+    }
 }
