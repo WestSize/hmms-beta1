@@ -52,72 +52,96 @@
                 <th:block th:include="~{fragments/user-panel-navi}"/>
 
                 <div class="tab-content">
-                    <div class="tab-pane active" id="home">
-                        <hr>
-                        <!-- инфо за фирмата -- старт -->
-                        <form class="form" th:action="@{/company-page}" th:field="updateCompany" method="post">
-                            <div class="form-group">
-                                <div class="col-xs-6">
-                                    <h4>Име на фирмата:</h4>
-                                    <input type="text" class="form-control" required name="name" id="name"
-                                           th:value="${companyInfo.name}"
-                                           title="Въведете ново име на фирмата, ако желаете да го промените">
-                                </div>
+                    <hr class="tab-pane active" id="home">
+                    <!-- инфо за фирмата -- старт -->
+                    <form class="form" th:action="@{/company-page}" th:field="updateCompany" method="post">
+                        <div class="form-group">
+                            <div class="col-xs-6">
+                                <h4>Име на фирмата:</h4>
+                                <input type="text" class="form-control" required name="name" id="name"
+                                       th:value="${companyInfo.name}"
+                                       title="Въведете ново име на фирмата, ако желаете да го промените">
                             </div>
-                            <div class="form-group">
-                                <div class="col-xs-6">
-                                    <h4>Описание на фирмата:</h4>
-                                    <input type="text" class="form-control" name="description" required id="description"
-                                           th:value="${companyInfo.description}"
-                                           title="Въведете ново описание на фирмата, ако желаете да го промените">
-                                    <!--                                    <textarea style="width: 100%; height: 150px;" type="text" class="form-control" name="description" required id="description" th:value="${companyInfo.description}" title="Въведете ново описание на фирмата, ако желаете да го промените"></textarea>-->
-                                </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-6">
+                                <h4>Описание на фирмата:</h4>
+                                <input type="text" class="form-control" name="description" required id="description"
+                                       th:value="${companyInfo.description}"
+                                       title="Въведете ново описание на фирмата, ако желаете да го промените">
+                                <!--                                    <textarea style="width: 100%; height: 150px;" type="text" class="form-control" name="description" required id="description" th:value="${companyInfo.description}" title="Въведете ново описание на фирмата, ако желаете да го промените"></textarea>-->
                             </div>
-                            <div class="form-group">
-                                <div class="col-xs-6">
-                                    <h4>Телефонен номер на фирмата:</h4>
-                                    <input type="text" class="form-control" name="phoneNumber" required id="phoneNumber"
-                                           th:value="${companyInfo.phoneNumber}"
-                                           title="Въведете телефонен номер на фирмата">
-                                </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-6">
+                                <h4>Телефонен номер на фирмата:</h4>
+                                <input type="text" class="form-control" name="phoneNumber" required id="phoneNumber"
+                                       th:value="${companyInfo.phoneNumber}"
+                                       title="Въведете телефонен номер на фирмата">
                             </div>
-                            <p>
-                            <h4>Брой работници:</h4> <span th:text="${companyInfo.numberOfWorkers}"></span> <a
-                                th:href="@{/workers-list(id=${companyInfo.getId()})}"><img src="images/edit.png"
-                                                                                           width="12px"
-                                                                                           title="Редактирай"/></a>
-                            <p>
-                            <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img
-                                src="images/edit.png" width="12px" title="Редактирай"/>
-                            <p>
-                            <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img
-                                src="images/edit.png" width="12px" title="Редактирай"/>
-                            <p>
-                            <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> <img
-                                src="images/edit.png" width="12px" title="Редактирай"/>
-                            <p>
-                            <h4>Чиста печалба:</h4> <span th:text="${companyInfo.profit}"></span> <img
-                                src="images/edit.png" width="12px" title="Редактирай"/>
-                            <div class="form-group">
-                                <div class="col-xs-12">
-                                    <br>
-                                    <button class="btn btn-lg btn-success" type="submit"><i
-                                            class="glyphicon glyphicon-ok-sign"></i> Save
-                                    </button>
-                                    <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i>
-                                        Reset
-                                    </button>
-                                </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-6">
+                                <h4>Ден за изплащане на заплати:</h4>
+                                <input type="date" class="form-control" name="paydayDate" required id="paydayDate"
+                                       th:value="${companyInfo.paydayDate}"
+                                       title="Въведете ден за изплащане на на заплати до персонала"
+                                       date-format="dd/MM/YYYY">
+                                <script>$('#paydayDate').datepicker({dateFormat: 'dd-mm-yy'}).val();</script>
                             </div>
-                        </form>
-                        <!-- инфо за фирмата - край -->
-                        <hr>
-                    </div>
-                </div><!--/tab-pane-->
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <br>
+                                <button class="btn btn-lg btn-success" type="submit"><i
+                                        class="glyphicon glyphicon-ok-sign"></i> Запази
+                                </button>
+                                <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i>
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    <p>
+                    <h4>Брой работници:</h4> <span th:text="${companyInfo.numberOfWorkers}"></span> <a
+                        th:href="@{/workers-list(id=${companyInfo.getId()})}"><img src="images/edit.png"
+                                                                                   width="12px"
+                                                                                   title="Редактирай"/></a>
+                    <p>
+                    <h4>Смени и работни дни:</h4>
+                    Въведете датата, за която искате да видите наличните смени или създайте нова смяна от
+                    <a href="/create-work-schedule">ТУК</a>:
+                    <form action="/company-workschedule" method="get">
+                        <input type="date" class="form-control" name="workScheduleDay" required id="workScheduleDay"
+                               title="Въведете ден за изплащане на на заплати до персонала">
+                        <p>
+                        <p>
+                            <button class="btn btn-sm btn-success" type="submit"><i
+                                    class="glyphicon glyphicon-ok-sign"></i> Търси
+                            </button>
+                    </form>
+                    <p>
+                    <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img
+                        src="images/edit.png" width="12px" title="Редактирай"/>
+                    <p>
+                    <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img
+                        src="images/edit.png" width="12px" title="Редактирай"/>
+                    <p>
+                    <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> <img
+                        src="images/edit.png" width="12px" title="Редактирай"/>
+                    <p>
+                    <h4>Чиста печалба:</h4> <span th:text="${companyInfo.profit}"></span> <img
+                        src="images/edit.png" width="12px" title="Редактирай"/>
 
-            </div><!--/tab-content-->
+                    <!-- инфо за фирмата - край -->
+                    <hr>
+                </div>
+            </div><!--/tab-pane-->
 
-        </div><!--/col-9-->
+        </div><!--/tab-content-->
+
+    </div><!--/col-9-->
     </div><!--/row-->
 
 

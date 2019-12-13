@@ -1,8 +1,7 @@
 package com.example.hmmsbeta1.web.controllers;
 
-import com.example.hmmsbeta1.web.dtos.PrivateMessageDto;
 import com.example.hmmsbeta1.web.entities.*;
-import com.example.hmmsbeta1.web.repositories.CompanyRepositories.ApplicationRepository;
+import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
 import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
 import com.example.hmmsbeta1.web.repositories.MessagesRepositories.MessageRepository;
 import com.example.hmmsbeta1.web.repositories.MessagesRepositories.PrivateConversationRepository;
@@ -10,8 +9,6 @@ import com.example.hmmsbeta1.web.repositories.UserRepository;
 import com.example.hmmsbeta1.web.services.PrivateMessagesService;
 import org.jasypt.util.text.BasicTextEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;

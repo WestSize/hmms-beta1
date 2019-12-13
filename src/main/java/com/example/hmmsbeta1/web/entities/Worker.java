@@ -27,6 +27,12 @@ public class Worker {
     @Column
     private String dateOfAppointment;
 
+    @Column
+    private boolean onDuty;
+
+    @Column
+    private int monthWorkedDays;
+
     public Worker() {
     }
 
@@ -76,5 +82,21 @@ public class Worker {
 
     public void setDateOfAppointment(String dateOfAppointment) {
         this.dateOfAppointment = dateOfAppointment;
+    }
+
+    public boolean isOnDuty() {
+        return onDuty;
+    }
+
+    public void setOnDuty(boolean onDuty) {
+        this.onDuty = onDuty;
+    }
+
+    public int getMonthWorkedDays() {
+        return monthWorkedDays;
+    }
+
+    public void setMonthWorkedDays(int monthWorkedDays) {
+        this.monthWorkedDays = monthWorkedDays;
     }
 }

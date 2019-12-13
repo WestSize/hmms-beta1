@@ -150,10 +150,12 @@
                         </div>
                     </div>
                     <div th:switch="${workersCounter}">
+                        <hr>
                         <span th:case="'0'">Все още няма работници във вашата фирма.
                         <p>
                         </span>
                         <span th:case="*">
+                            <h4 style="color: #BF2E2E;">Вашите работници:</h4>
                             <table class="table">
                                 <thead class="thead-dark">
                                 <tr>

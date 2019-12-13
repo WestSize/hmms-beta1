@@ -58,7 +58,19 @@
                             <div class="alert alert-danger">Този потребител вече е нает от друга фирма.</div>
                         </div>
                         <div th:if="${param.notOwner}">
-                            <div class="alert alert-danger">Вие нямате фирма, за да назначавате хора.</div>
+                            <div class="alert alert-danger">Вие нямате фирма, за да използвате тази страница.</div>
+                        </div>
+                        <div th:if="${param.notWorker}">
+                            <div class="alert alert-danger">Вие не сте работник, за да използвате тази страница.</div>
+                        </div>
+                        <div th:if="${param.reportOk}">
+                            <div class="alert alert-success">Вашият доклад беше изпратен успешно!</div>
+                        </div>
+                        <div th:if="${param.notYourWorkSchedule}">
+                            <div class="alert alert-danger">Вие не сте работник от тази смяна, за да използвате тази страница.</div>
+                        </div>
+                        <div th:if="${param.cantEditReport}">
+                            <div class="alert alert-danger">Не може да редактирате вече изпратен доклад.</div>
                         </div>
                         <div th:switch="${#authentication.principal.getUserWorkingStatus()}">
                             <!-- tva e contenta na guestovete -->
@@ -120,10 +132,11 @@
                                     </div>
                                 </div>
                             </form>
+                                <!-- форма за регистриране на нова фирма - край -->
                             </span>
                             <!-- tva e contenta na ownerite -->
                             <span th:case="'owner'">
-                            Вашият работен статус вмомента е: <b>собственик</b>. Това е списък със вашите фирми:
+                            Вашият работен статус вмомента е: <b>собственик</b>. Това е вашата фирма:
                             <p>
                                 <table class="table">
                                     <thead class="thead-dark">
@@ -153,8 +166,64 @@
                             </span>
                             <!-- Tva e content-a na rabotnicite -->
                             <span th:case="*">
-                                Вашият статус: работник във фирма "едиси кояси", на позиция "едиси кояси". Всеки ден трябва
-                                да попълвате свършеното през работния ден, за да получите дневния си доход.
+                                Вашият статус: работник във фирма "<b><span
+                                    th:text="${workerInfo.getCompany().getName()}"></span></b>", на позиция "<b><span
+                                    th:text="${workerInfo.getPosition()}"></span></b>". След края на смяната трябва да попълните
+                                отчет на съвршеното през смяната. Това става чрез опцията "<b>Отчети смяна</b>", като
+                                отчетът трябва да бъде извършен до края на денонощието, след което опцията се затваря.
+                                <div th:switch="${myWorkSchedulesCounter}">
+                                    <span th:case="'0'">
+                                        <hr>
+                                        Няма регистрирани налични смени.
+                                    </span>
+                                    <span th:case="*">
+                                        <hr>
+                                        <h4 style="color: #BF2E2E;">Вашите последни смени:</h4>
+                                        <table class="table">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Смяна №</th>
+                                    <th scope="col">Дата</th>
+                                    <th scope="col">Статус</th>
+                                    <th scope="col">Опции</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="smqna : ${myWorkSchedule}">
+                                    <td th:text="${smqna.getId()}">Смяна НО</td>
+                                    <td th:text="${smqna.getDate()}">Дата</td>
+                                    <div th:switch="${smqna.isWorkerDone()}">
+                                        <span th:case="true">
+                                            <td><span style="color:#28A745;">Приключена</span></td>
+                                        </span>
+                                        <span th:case="false">
+                                            <td>Не приключена</td>
+                                        </span>
+                                    </div>
+                                    <div th:switch="${smqna.getDate()}">
+                                        <span th:case="${#dates.format(#dates.createNow(),'YYYY-MM-dd')}">
+                                        <div th:switch="${smqna.getDate()}">
+                                        <span th:case="${#dates.format(#dates.createNow(),'YYYY-MM-dd')}">
+                                            <div th:switch="${smqna.isWorkerDone()}">
+                                                <span th:case="true"><td><a th:href="@{/report-view(id=${smqna.getId()})}">Преглед на отчета</a></td></span>
+                                                <span th:case="*"><td><a th:href="@{/work-schedule-report(id=${smqna.getId()})}">Отчети смяната</a></td></span>
+                                            </div>
+                                        </span>
+                                        <span th:case="*">
+                                            <td></td>
+                                        </span>
+                                        </div>
+                                        </span>
+                                        <span th:case="*">
+                                            <td></td>
+                                        </span>
+                                    </div>
+                                </tr>
+                                </tbody>
+                            </table>
+                                        <small>* На таблицата се показват максимално 12 смени!</small>
+                                    </span>
+                                </div>
                             </span>
                             <hr>
                         </div>

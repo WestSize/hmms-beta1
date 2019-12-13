@@ -1,4 +1,4 @@
-package com.example.hmmsbeta1.web.repositories.CompanyRepositories;
+package com.example.hmmsbeta1.web.repositories.WorkerRepositories;
 
 import com.example.hmmsbeta1.web.entities.Worker;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -32,6 +32,8 @@ public class Company {
     @Lob
     @Column(name = "circular_letter", nullable = false, length = 512)
     private String circularLetter;
+    @Column(name="payday_date")
+    private String paydayDate;
 
 //    @OneToMany(fetch = FetchType.LAZY, mappedBy = "company")
 //    private List<Worker> workers;
@@ -125,6 +127,14 @@ public class Company {
 
     public void setCircularLetter(String circularLetter) {
         this.circularLetter = circularLetter;
+    }
+
+    public String getPaydayDate() {
+        return paydayDate;
+    }
+
+    public void setPaydayDate(String paydayDate) {
+        this.paydayDate = paydayDate;
     }
 
     //    public List<Worker> getWorkers() {

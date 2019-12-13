@@ -1,9 +1,10 @@
 package com.example.hmmsbeta1.web.controllers;
 
 import com.example.hmmsbeta1.web.entities.*;
-import com.example.hmmsbeta1.web.repositories.CompanyRepositories.ApplicationRepository;
+import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
 import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
-import com.example.hmmsbeta1.web.repositories.CompanyRepositories.WorkerRepository;
+import com.example.hmmsbeta1.web.repositories.WorkScheduleRepositories.WorkScheduleRepository;
+import com.example.hmmsbeta1.web.repositories.WorkerRepositories.WorkerRepository;
 import com.example.hmmsbeta1.web.repositories.MessagesRepositories.MessageRepository;
 import com.example.hmmsbeta1.web.repositories.UserRepository;
 import com.example.hmmsbeta1.web.services.PrivateMessagesService;
@@ -31,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -55,15 +57,25 @@ public class CompaniesController {
     @Autowired
     private WorkerRepository workerRepository;
 
+    @Autowired
+    private WorkScheduleRepository workScheduleRepository;
+
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
 
     private Long companyId = null;
     private Long workerId = null;
+    private Long workScheduleId = null;
 
     @RequestMapping(value = "/company-home", method = RequestMethod.GET)
     public ModelAndView companyHome(Model model, Principal principal) {
         model.addAttribute("newcompany", new Company());
         model.addAttribute("usercompanies", companyRepository.showOnlyUsersCompanies(principal.getName()));
+        User me = userRepository.findByEmail(principal.getName());
+        if(me.getWorkingStatus().equals("worker")) {
+            model.addAttribute("workerInfo", workerRepository.showWorkerByUserId(me.getId()));
+            model.addAttribute("myWorkSchedulesCounter",workScheduleRepository.showLast12WorkSchedulesByUserId(me.getId()).size());
+            model.addAttribute("myWorkSchedule", workScheduleRepository.showLast12WorkSchedulesByUserId(me.getId()));
+        }
         return new ModelAndView("company-home");
     }
 
@@ -153,6 +165,7 @@ public class CompaniesController {
         oldCompany.setName(company.getName());
         oldCompany.setDescription(company.getDescription());
         oldCompany.setPhoneNumber(company.getPhoneNumber());
+        oldCompany.setPaydayDate(company.getPaydayDate());
         companyRepository.save(oldCompany);
         return "redirect:/company-page?id=" + oldCompany.getId();
     }
@@ -225,10 +238,10 @@ public class CompaniesController {
     @RequestMapping(value = "/approveToWork", method = RequestMethod.POST)
     public String createNewWorker(Worker worker, Principal principal) {
         User user = userRepository.getOne(workerId);
-        workerId = null;
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy'");
+        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd'-'yyyy");
         Date date = new Date(System.currentTimeMillis());
         List<Application> workersApplications = applicationRepository.showApplicationByCandidateId(workerId);
+        workerId = null;
         for (int i = 0; i < workersApplications.size(); i++) {
             Application application = workersApplications.get(i);
             applicationRepository.deleteById(application.getId());
@@ -239,10 +252,157 @@ public class CompaniesController {
         worker.setCompany(company);
         worker.setUser(user);
         worker.setDateOfAppointment(formatter.format(date));
+        worker.setOnDuty(false);
         workerRepository.save(worker);
         int companyWorkersCounter = company.getNumberOfWorkers();
         company.setNumberOfWorkers(companyWorkersCounter + 1);
         companyRepository.save(company);
         return "redirect:/company-page?id=" + company.getId();
+    }
+
+    @RequestMapping(value = "/company-workschedule", method = RequestMethod.GET)
+    public String workSchedule(Model model, Principal principal, Long id, @RequestParam("workScheduleDay")String searchingDay){
+        User user = userRepository.findByEmail(principal.getName());
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        if(!user.getWorkingStatus().equals("owner")){
+            return "/company-home?notOwner";
+        } else if (!company.getUser().getId().equals(user.getId())) {
+            return "/company-home?notOwner";
+        } else {
+            model.addAttribute("companysWorkSchedulesCounter", workScheduleRepository.showWorkScheduleOfCompanyByDateAndCompanyId(searchingDay, company.getId()).size());
+            model.addAttribute("companysWorkSchedules", workScheduleRepository.showWorkScheduleOfCompanyByDateAndCompanyId(searchingDay, company.getId()));
+            return "/company-workschedule";
+        }
+    }
+    @RequestMapping(value = "/create-work-schedule", method = RequestMethod.GET)
+    public String workScheduleCreate(Principal principal){
+        User me = userRepository.findByEmail(principal.getName());
+        if(!me.getWorkingStatus().equals("owner")){
+            return "redirect:/company-home?notOwner";
+        } else {
+            return "/create-work-schedule";
+        }
+    }
+
+    @RequestMapping(value = "/create-work-schedule", method = RequestMethod.POST)
+    public String workSchedulePost(@RequestParam("workersList")String workers, @RequestParam("nowDate")String nowDate,WorkSchedule workSchedule, Principal principal){
+//        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd'-'yyyy");
+        String[] workersArray = workers.split(",\\s+");
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        for (int i = 0; i < workersArray.length; i++) {
+            User user = userRepository.findByEmail(workersArray[i]);
+            if(user==null){
+                return "redirect:/create-work-schedule?noSuchUser";
+            }
+//            Worker worker = workerRepository.showWorkerByCompanyIdAndUserId(company.getId(), user.getId());
+            Worker worker = null;
+            List<Worker> allWorkers = workerRepository.findAll();
+            for (int j = 0; j < allWorkers.size(); j++) {
+                Worker nowWorker = allWorkers.get(j);
+                Long nowCompany = nowWorker.getCompany().getId();
+                Long nowUser = nowWorker.getUser().getId();
+                if(nowCompany.equals(company.getId()) && nowUser.equals(user.getId())){
+                    worker = nowWorker;
+                }
+            }
+            if(worker==null){
+                return "redirect:/create-work-schedule?noSuchUser";
+            } else if (!worker.getCompany().getId().equals(company.getId())){
+                return "redirect:/create-work-schedule?noSuchWorker";
+            }
+            String[] workScheduleDateSplittedArray = workSchedule.getDate().split("-");
+            String workScheduleDateSplittedString = null;
+            for (int j = 0; j < workScheduleDateSplittedArray.length; j++) {
+                if(j==0){
+                    workScheduleDateSplittedString=workScheduleDateSplittedArray[j];
+                } else {
+                    workScheduleDateSplittedString += workScheduleDateSplittedArray[j];
+                }
+            }
+            String[] nowDateSplittedArray = nowDate.split("-");
+            String nowDateSplittedString = null;
+            for (int k = 0; k < nowDateSplittedArray.length; k++) {
+                if(k==0){
+                    nowDateSplittedString=nowDateSplittedArray[k];
+                } else {
+                    nowDateSplittedString += nowDateSplittedArray[k];
+                }
+            }
+            int workScheduleDate = Integer.parseInt(workScheduleDateSplittedString);
+            int nowDateInt = Integer.parseInt(nowDateSplittedString);
+            if(workScheduleDate<nowDateInt){
+               return "redirect:/create-work-schedule?noBackDate";
+            }
+            workSchedule.setWorker(worker);
+            workSchedule.setWorkerDone(false);
+            workSchedule.setCompany(company);
+            workScheduleRepository.save(workSchedule);
+        }
+        return "redirect:/company-page?id="+company.getId();
+    }
+
+    @RequestMapping(value = "/work-schedule-report", method = RequestMethod.GET)
+    public String workReport(Long id, Principal principal, Model model){
+        User user = userRepository.findByEmail(principal.getName());
+        Worker worker = workerRepository.showWorkerByUserId(user.getId());
+        WorkSchedule workSchedule = workScheduleRepository.getOne(id);
+        if(workSchedule==null){
+            return "redirect:/company-home?notYourWorkSchedule";
+        } else if(workSchedule.isWorkerDone()) {
+            return "redirect:/company-home?cantEditReport";
+        }   else if(!user.getWorkingStatus().equals("worker")){
+            return "redirect:/company-home?notWorker";
+        } else if(!workSchedule.getWorker().getId().equals(worker.getId())){
+            return "redirect:/company-home?notYourWorkSchedule";
+        }
+        model.addAttribute("workScheduleInfo", workSchedule);
+        model.addAttribute("workScheduleFull", new WorkSchedule());
+        workScheduleId = id;
+        return "work-schedule-report";
+    }
+
+    @RequestMapping(value = "/work-schedule-report-post", method = RequestMethod.POST)
+    public String workReportPost(@Valid WorkSchedule workScheduleNew){
+        WorkSchedule workScheduleOld = workScheduleRepository.getOne(workScheduleId);
+        workScheduleId = null;
+        workScheduleOld.setWorkerDone(true);
+        workScheduleOld.setEndDateAndTime(workScheduleNew.getEndDateAndTime());
+        workScheduleOld.setWorkerReport(workScheduleNew.getWorkerReport());
+        int oldWorkedDays = workScheduleOld.getWorker().getMonthWorkedDays();
+        workScheduleOld.getWorker().setMonthWorkedDays(oldWorkedDays+1);
+        workScheduleRepository.save(workScheduleOld);
+        return "redirect:/company-home?reportOk";
+    }
+
+    @RequestMapping(value = "/report-view", method = RequestMethod.GET)
+    public String workReportView(long id, Model model){
+        model.addAttribute("workScheduleInfo", workScheduleRepository.getOne(id));
+        return "work-schedule-report-view";
+    }
+
+    @RequestMapping(value = "/view-logs", method = RequestMethod.GET)
+    public String viewUserLogs(long id, Model model){
+        List<WorkSchedule> workSchedules = workScheduleRepository.showAllWorkScheduleByUserId(id);
+        model.addAttribute("userLogs", workSchedules);
+        List<WorkSchedule> endedWorks = new ArrayList<>();
+        List<WorkSchedule> notEndedWorks = new ArrayList<>();
+        for (WorkSchedule schedule : workSchedules) {
+            if(schedule.isWorkerDone()){
+                endedWorks.add(schedule);
+            } else {
+                notEndedWorks.add(schedule);
+            }
+        }
+        model.addAttribute("userDetails", userRepository.getOne(id));
+        model.addAttribute("userLogsCounter", workSchedules.size());
+        model.addAttribute("endedWorks", endedWorks.size());
+        model.addAttribute("notEndedWorks", notEndedWorks.size());
+        return "view-logs";
+    }
+
+    @RequestMapping(value = "/delete-workschedule")
+    public String deleteWorkSchedule(Long id){
+        workScheduleRepository.deleteById(id);
+        return "redirect:/company-home?deleteok";
     }
 }

@@ -42,6 +42,7 @@ public class UserServiceImpl implements UserService {
         user.setUnreadedMessages(0);
         user.setWorkingStatus("guest");
         user.setAvatarPath("http://ssl.gstatic.com/accounts/ui/avatar_2x.png");
+        user.setFacebookPage("http://facebook.com");
         return userRepository.save(user);
     }
 
