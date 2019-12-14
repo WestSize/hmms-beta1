@@ -46,7 +46,7 @@ public class MessagesController {
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
     public String messages(Model model, Principal principal) {
-
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
         if(privateConversationRepository.findAll().size()>0){
             String userEmail = principal.getName();
             if(messageRepository.showOnlyUsersMessages(userEmail).size()>0) {
@@ -66,7 +66,8 @@ public class MessagesController {
 }
 
     @RequestMapping(value = "/new-message", method = RequestMethod.GET)
-    public String showNewMessage(Model model){
+    public String showNewMessage(Model model, Principal principal){
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
         model.addAttribute("newmsg", new PrivateConversation());
         return "/new-message";
     }
@@ -97,6 +98,7 @@ public class MessagesController {
     @RequestMapping(value = "/read-message", method = RequestMethod.GET)
 //    @ResponseBody()
     public String readMessage(long id, Model model, Principal principal){
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
         if(!principal.getName().equals(privateConversationRepository.getOne(id).getUserSender()) &&
                 !principal.getName().equals(privateConversationRepository.getOne(id).getUserRecipient())){
             return "redirect:/messages?noSuchMsg";

@@ -32,4 +32,9 @@ public class CompanyCustomRepositoryImpl implements CompanyCustomRepository{
         query.setParameter(1, userId);
         return (Company) query.getSingleResult();
     }
+
+    @Override
+    public Company showCompanyByUserId(Long id) {
+        return null;
+    }
 }

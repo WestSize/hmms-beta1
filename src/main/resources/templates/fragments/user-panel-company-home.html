@@ -72,7 +72,7 @@
                         <div th:if="${param.cantEditReport}">
                             <div class="alert alert-danger">Не може да редактирате вече изпратен доклад.</div>
                         </div>
-                        <div th:switch="${#authentication.principal.getUserWorkingStatus()}">
+                        <div th:switch="${userInfo.getWorkingStatus()}">
                             <!-- tva e contenta na guestovete -->
                             <span th:case="'guest'">
                             Вашият работен статус вмомента е: <b>гост</b>. Като гост, Вие можете да комуникирате с потребителите
@@ -166,8 +166,8 @@
                             </span>
                             <!-- Tva e content-a na rabotnicite -->
                             <span th:case="*">
-                                Вашият статус: работник във фирма "<b><span
-                                    th:text="${workerInfo.getCompany().getName()}"></span></b>", на позиция "<b><span
+                                Вашият статус: работник във фирма "<b><a th:href="@{/company-page(id=${workerInfo.getCompany().getId()})}"><span
+                                    th:text="${workerInfo.getCompany().getName()}"></span></a></b>", на позиция "<b><span
                                     th:text="${workerInfo.getPosition()}"></span></b>". След края на смяната трябва да попълните
                                 отчет на съвршеното през смяната. Това става чрез опцията "<b>Отчети смяна</b>", като
                                 отчетът трябва да бъде извършен до края на денонощието, след което опцията се затваря.
@@ -221,7 +221,7 @@
                                 </tr>
                                 </tbody>
                             </table>
-                                        <small>* На таблицата се показват максимално 12 смени!</small>
+                                        <small>* На таблицата се показват максимално до 12 смени!</small>
                                     </span>
                                 </div>
                             </span>

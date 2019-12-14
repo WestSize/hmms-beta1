@@ -56,10 +56,14 @@
                     <div class="tab-pane active" id="home">
                         <hr>
                         <div th:if="${param.noSuchUser}">
-                            <div class="alert alert-danger">Няма такъв потребител в системата или във вашата фирма.</div>
+                            <div class="alert alert-danger">Няма такъв или такива потребители в системата или във вашата фирма.</div>
+                        </div>
+                        <div th:if="${param.missingWorkers}">
+                            <div class="alert alert-warning">Някой от въведените потребители липсват в системата или във вашата фирма!
+                            Въпреки това, коректно въведените потребители са вписани в смените.</div>
                         </div>
                         <div th:if="${param.noSuchWorker}">
-                            <div class="alert alert-danger">Този потребител не е работник във вашата фирма.</div>
+                            <div class="alert alert-danger">Някой потребител не е работник във вашата фирма.</div>
                         </div>
                         <div th:if="${param.noBackDate}">
                             <div class="alert alert-danger">Няма как да създадете бъдещи смени със задна дата.</div>

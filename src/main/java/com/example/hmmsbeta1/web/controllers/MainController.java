@@ -1,8 +1,12 @@
 package com.example.hmmsbeta1.web.controllers;
 
 
+import com.example.hmmsbeta1.web.entities.Company;
 import com.example.hmmsbeta1.web.entities.User;
+import com.example.hmmsbeta1.web.entities.Worker;
+import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
 import com.example.hmmsbeta1.web.repositories.UserRepository;
+import com.example.hmmsbeta1.web.repositories.WorkerRepositories.WorkerRepository;
 import com.example.hmmsbeta1.web.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,10 +42,17 @@ public class MainController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-    public static String uploadDirectory = System.getProperty("user.dir")+"/uploads/avatars";
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    @Autowired
+    private WorkerRepository workerRepository;
+
+    public static String uploadDirectory = System.getProperty("user.dir") + "/uploads/avatars";
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public ModelAndView home(Model model, Principal principal){
+    public ModelAndView home(Model model, Principal principal) {
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
 //        int userUnreededMsgs = userService.countUnreededMessages(principal.getName());
         model.addAttribute("updateuser", new User());
         //        ot tuka pochva reloada na principalite
@@ -56,6 +67,7 @@ public class MainController {
         // do tuka
         return new ModelAndView("home.html");
     }
+
     @GetMapping("/login")
     public String login(Model model) {
         return "login";
@@ -72,7 +84,7 @@ public class MainController {
         oldUserInfo.setFirstName(newUserInfo.getFirstName());
         oldUserInfo.setLastName(newUserInfo.getLastName());
         oldUserInfo.setEmail(newUserInfo.getEmail());
-        if(!oldUserInfo.getPassword().equals(newUserInfo.getPassword()) && !newUserInfo.getPassword().equals("")) {
+        if (!oldUserInfo.getPassword().equals(newUserInfo.getPassword()) && !newUserInfo.getPassword().equals("")) {
             oldUserInfo.setPassword(passwordEncoder.encode(newUserInfo.getPassword()));
         }
         oldUserInfo.setAge(newUserInfo.getAge());
@@ -83,7 +95,7 @@ public class MainController {
     }
 
     @RequestMapping(value = "/uploadAvatar", method = RequestMethod.POST)
-    public String uploadAvatar(@RequestParam("avatarPath")String avatarPath, Principal principal) throws IOException {
+    public String uploadAvatar(@RequestParam("avatarPath") String avatarPath, Principal principal) throws IOException {
         User user = userService.findByEmail(principal.getName());
         user.setAvatarPath(avatarPath);
         userRepository.save(user);
@@ -91,8 +103,39 @@ public class MainController {
     }
 
     @RequestMapping(value = "/user-page", method = RequestMethod.GET)
-    public String viewUserPage(Long id, Model model){
-        model.addAttribute("userinfo", userRepository.getOne(id));
-        return "/user-page";
+    public String viewUserPage(Long id, Model model, Principal principal) {
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        User user = userRepository.getOne(id);
+        Worker worker = null; //worker
+        List<Worker> allWorkers = workerRepository.findAll();
+        for (int i = 0; i < allWorkers.size(); i++) {
+            Worker nowWorker = allWorkers.get(i);
+            if (nowWorker.getUser() == user) {
+                worker = nowWorker;
+            }
+        }
+        if (worker != null) {
+            User me = userRepository.findByEmail(principal.getName());
+            Company userCompany = worker.getCompany();
+            if (me.getWorkingStatus().equals("owner") && userCompany.equals(companyRepository.showOneUserCompany(principal.getName()))) {
+                model.addAttribute("userinfo", userRepository.getOne(id));
+                model.addAttribute("companyDetails", userCompany);
+                return "/user-page-owner";
+            } else {
+                model.addAttribute("userinfo", userRepository.getOne(id));
+                model.addAttribute("companyDetails", userCompany);
+                return "/user-page";
+            }
+        } else {
+            Company userCompany = companyRepository.showOneUserCompany(user.getEmail());
+            if(user.getWorkingStatus().equals("owner")){
+                model.addAttribute("userinfo", userRepository.getOne(id));
+                model.addAttribute("companyDetails", userCompany);
+                return "/user-page";
+            } else {
+                model.addAttribute("userinfo", userRepository.getOne(id));
+                return "/user-page";
+            }
+        }
     }
 }

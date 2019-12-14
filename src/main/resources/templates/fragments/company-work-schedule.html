@@ -84,12 +84,13 @@
                                     <div th:switch="${smqna.isWorkerDone()}">
                                         <span th:case="true">
                                             <td><span style="color:#28A745;">Приключена</span></td>
-                                             <td><a th:href="@{/report-view(id=${smqna.getId()})}">Виж доклада</a> / <a href="#"><img
+                                             <td><a th:href="@{/report-view(id=${smqna.getId()})}">Виж доклада</a> / <a
+                                                     th:href="@{/delete-workschedule(id=${smqna.getId()})}"><img
                                                      src="/images/delete.png" width="20px"/></a></td>
                                         </span>
                                         <span th:case="false">
                                             <td>Не приключена</td>
-                                            <td><a href="#"><img
+                                            <td><a th:href="@{/delete-workschedule(id=${smqna.getId()})}"><img
                                                     src="/images/delete.png" width="20px"/></a></td>
                                         </span>
                                     </div>

@@ -91,6 +91,15 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <div class="col-xs-6">
+                                <h4>Първоначална инвестиция:</h4>
+                                <input type="number" class="form-control" name="investment" required id="investment"
+                                       th:value="${companyInfo.investment}"
+                                       title="Въведете ден за изплащане на на заплати до персонала"> лв.
+                                <script>$('#paydayDate').datepicker({dateFormat: 'dd-mm-yy'}).val();</script>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <div class="col-xs-12">
                                 <br>
                                 <button class="btn btn-lg btn-success" type="submit"><i
@@ -125,9 +134,9 @@
                     <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img
                         src="images/edit.png" width="12px" title="Редактирай"/>
                     <p>
-                    <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img
-                        src="images/edit.png" width="12px" title="Редактирай"/>
-                    <p>
+<!--                    <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img-->
+<!--                        src="images/edit.png" width="12px" title="Редактирай"/>-->
+<!--                    <p>-->
                     <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> <img
                         src="images/edit.png" width="12px" title="Редактирай"/>
                     <p>

@@ -7,4 +7,5 @@ import java.util.List;
 public interface CompanyCustomRepository {
     List showOnlyUsersCompanies(String email);
     Company showOneUserCompany(String email);
+    Company showCompanyByUserId(Long id);
 }
