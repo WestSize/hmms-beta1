@@ -53,6 +53,9 @@
 
                 <div class="tab-content">
                     <hr class="tab-pane active" id="home">
+                    <div th:if="${param.workScheduleOk}">
+                        <div class="alert alert-success">Смяната беше създадена успешно.</div>
+                    </div>
                     <!-- инфо за фирмата -- старт -->
                     <form class="form" th:action="@{/company-page}" th:field="updateCompany" method="post">
                         <div class="form-group">
@@ -134,14 +137,13 @@
                     <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img
                         src="images/edit.png" width="12px" title="Редактирай"/>
                     <p>
-<!--                    <h4>Първоначална инвестиция:</h4> <span th:text="${companyInfo.investment}"></span> <img-->
-<!--                        src="images/edit.png" width="12px" title="Редактирай"/>-->
-<!--                    <p>-->
-                    <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> <img
-                        src="images/edit.png" width="12px" title="Редактирай"/>
+
+                    <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> лв. <a
+                        th:href="@{/income-page(id=${companyInfo.getId()})}"><img src="images/edit.png"
+                                                                                   width="12px"
+                                                                                   title="Редактирай"/></a>
                     <p>
-                    <h4>Чиста печалба:</h4> <span th:text="${companyInfo.profit}"></span> <img
-                        src="images/edit.png" width="12px" title="Редактирай"/>
+                    <h4>Чиста печалба:</h4> <span th:text="${companyInfo.profit}"></span> лв.
 
                     <!-- инфо за фирмата - край -->
                     <hr>

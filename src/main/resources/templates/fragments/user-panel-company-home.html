@@ -60,6 +60,9 @@
                         <div th:if="${param.notOwner}">
                             <div class="alert alert-danger">Вие нямате фирма, за да използвате тази страница.</div>
                         </div>
+                        <div th:if="${param.notYourCompany}">
+                            <div class="alert alert-danger">Тази фирма не е ваша, за да гледате приходите ѝ.</div>
+                        </div>
                         <div th:if="${param.notWorker}">
                             <div class="alert alert-danger">Вие не сте работник, за да използвате тази страница.</div>
                         </div>

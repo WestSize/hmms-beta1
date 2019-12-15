@@ -3,6 +3,8 @@ package com.example.hmmsbeta1.web.controllers;
 import com.example.hmmsbeta1.web.entities.*;
 import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
 import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
+import com.example.hmmsbeta1.web.repositories.IncomeRepositories.IncomeRepository;
+import com.example.hmmsbeta1.web.repositories.SalaryRepositories.SalaryRepository;
 import com.example.hmmsbeta1.web.repositories.WorkScheduleRepositories.WorkScheduleRepository;
 import com.example.hmmsbeta1.web.repositories.WorkerRepositories.WorkerRepository;
 import com.example.hmmsbeta1.web.repositories.MessagesRepositories.MessageRepository;
@@ -31,6 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,8 +41,6 @@ import java.util.List;
 
 @Controller
 public class CompaniesController {
-    @Autowired
-    private PrivateMessagesService privateMessagesService;
 
     @Autowired
     private UserRepository userRepository;
@@ -51,13 +52,16 @@ public class CompaniesController {
     private ApplicationRepository applicationRepository;
 
     @Autowired
-    private MessageRepository messageRepository;
-
-    @Autowired
     private WorkerRepository workerRepository;
 
     @Autowired
     private WorkScheduleRepository workScheduleRepository;
+
+    @Autowired
+    private IncomeRepository incomeRepository;
+
+    @Autowired
+    private SalaryRepository salaryRepository;
 
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
 
@@ -83,6 +87,8 @@ public class CompaniesController {
     @RequestMapping(value = "/company-home", method = RequestMethod.POST)
     public String processCompany(@Valid Company company, Principal principal) {
         User user = userRepository.findByEmail(principal.getName());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
         company.setUser(user);
         company.setNumberOfOffices(0);
         company.setNumberOfWorkers(0);
@@ -92,7 +98,15 @@ public class CompaniesController {
                 "се свържете с нас на тел: (не е зададен). Поздрави, " + user.getFirstName() + " " + user.getLastName() + " (управител). :)");
         user.setWorkingStatus("owner");
         companyRepository.save(company);
-        return "/company-home";
+        Income income = new Income();
+        income.setCompany(company);
+        income.setIncomeDate(formatter.format(date));
+        income.setIncomeDescription("Първоначално въведена инвестиция, при създаване на фирмата.");
+        int incomeSum = company.getIncome();
+        income.setIncomePrice(incomeSum);
+        incomeRepository.save(income);
+        Long companyId = company.getId();
+        return "redirect:/company-page?id="+companyId;
     }
 
     @RequestMapping(value = "/company-page", method = RequestMethod.GET)
@@ -370,7 +384,7 @@ public class CompaniesController {
                 return "redirect:/create-work-schedule?missingWorkers";
             }
         }
-        return "redirect:/company-page?id=" + company.getId();
+        return "redirect:/company-page?id=" + company.getId()+"&workScheduleOk";
     }
 
     @RequestMapping(value = "/work-schedule-report", method = RequestMethod.GET)
@@ -439,5 +453,174 @@ public class CompaniesController {
     public String deleteWorkSchedule(Long id) {
         workScheduleRepository.deleteById(id);
         return "redirect:/company-home?deleteok";
+    }
+
+    @RequestMapping(value = "/income-page", method = RequestMethod.GET)
+    public String companyIncome(Model model, Principal principal, Long id){
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
+        String nowDate = formatter.format(date);
+        Company company = companyRepository.getOne(id);
+        User me = userRepository.findByEmail(principal.getName());
+        if(!company.getUser().equals(me)){
+            return "redirect:/company-home?notYourCompany";
+        } else {
+            model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+            model.addAttribute("companyIncomesCounter", incomeRepository.showLast12IncomesByCompanyId(id).size());
+            model.addAttribute("companyIncomes", incomeRepository.showLast12IncomesByCompanyId(id));
+            model.addAttribute("fullIncomeCash", company.getIncome());
+            String[] payDayDateSplittedArray = company.getPaydayDate().split("-");
+            String payDayDateSplittedString = null;
+            for (int j = 0; j < payDayDateSplittedArray.length; j++) {
+                if (j == 0) {
+                    payDayDateSplittedString = payDayDateSplittedArray[j];
+                } else {
+                    payDayDateSplittedString += payDayDateSplittedArray[j];
+                }
+            }
+            String[] nowDateSplittedArray = nowDate.split("-");
+            String nowDateSplittedString = null;
+            for (int k = 0; k < nowDateSplittedArray.length; k++) {
+                if (k == 0) {
+                    nowDateSplittedString = nowDateSplittedArray[k];
+                } else {
+                    nowDateSplittedString += nowDateSplittedArray[k];
+                }
+            }
+            int payDayDate = Integer.parseInt(payDayDateSplittedString);
+            int nowDateInt = Integer.parseInt(nowDateSplittedString);
+            if(nowDateInt>=payDayDate) {
+                model.addAttribute("paydayDate", company.getPaydayDate());
+                int paydayFullSum = 0;
+                List<Worker> companyWorkers = workerRepository.showWorkersByCompanyId(company.getId());
+                String[] nowYearAndMonth = nowDate.split("-");
+                int year = Integer.parseInt(nowYearAndMonth[0]);
+                int month = Integer.parseInt(nowYearAndMonth[1]);
+                for (Worker companyWorker : companyWorkers) {
+                    YearMonth yearMonthObject = YearMonth.of(year, month);
+                    int daysInMonth = yearMonthObject.lengthOfMonth();
+                    int workerPaycheckPerDay = companyWorker.getSalary()/daysInMonth;
+                    int workerPaycheckFull = companyWorker.getMonthWorkedDays()*workerPaycheckPerDay;
+                    paydayFullSum += workerPaycheckFull;
+                }
+                model.addAttribute("paydaySum", paydayFullSum);
+            } else {
+                model.addAttribute("paydayDate", "0");
+            }
+            return "/income-page";
+        }
+    }
+
+    @RequestMapping(value = "/income-page", method = RequestMethod.POST)
+    public String insertIncome(Model model, Principal principal, Income income){
+//        User me = userRepository.findByEmail(principal.getName());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        income.setCompany(company);
+        income.setIncomeDate(formatter.format(date));
+        incomeRepository.save(income);
+        int nowProfit = company.getProfit();
+        int nowIncome = company.getIncome();
+        company.setIncome(nowIncome+income.getIncomePrice());
+        company.setProfit(nowProfit+income.getIncomePrice());
+        companyRepository.save(company);
+        return "redirect:/income-page?id="+company.getId();
+    }
+
+    @RequestMapping(value = "/income-by-date", method = RequestMethod.GET)
+    public String getIncomeByDate(Model model, Principal principal, @RequestParam("incomeDay") String incomeDay){
+        User me = userRepository.findByEmail(principal.getName());
+        if(!me.getWorkingStatus().equals("owner")){
+            return "redirect:/comapny-home?notOwner";
+        }
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("incomeDetailsCounter", incomeRepository.showAllIncomesByCompanyIdAndDate(company.getId(), incomeDay).size());
+        model.addAttribute("incomeDetails", incomeRepository.showAllIncomesByCompanyIdAndDate(company.getId(), incomeDay));
+        model.addAttribute("incomeDay", incomeDay);
+
+        return "/income-by-date";
+    }
+
+    @RequestMapping(value = "/salaries-pay", method = RequestMethod.POST)
+    public String salariesPay(Model model, Principal principal, Long id){
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
+        String nowDate = formatter.format(date);
+        User me = userRepository.findByEmail(principal.getName());
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        int paydayFullSum = 0;
+        List<Worker> companyWorkers = workerRepository.showWorkersByCompanyId(company.getId());
+        String[] nowYearAndMonth = nowDate.split("-");
+        int year = Integer.parseInt(nowYearAndMonth[0]);
+        int month = Integer.parseInt(nowYearAndMonth[1]);
+        for (Worker companyWorker : companyWorkers) {
+            YearMonth yearMonthObject = YearMonth.of(year, month);
+            int daysInMonth = yearMonthObject.lengthOfMonth();
+            int workerPaycheckPerDay = companyWorker.getSalary()/daysInMonth;
+            int workerPaycheckFull = companyWorker.getMonthWorkedDays()*workerPaycheckPerDay;
+            paydayFullSum += workerPaycheckFull;
+        }
+        if(company.getIncome()<paydayFullSum){
+            return "redirect:/income-page?id="+company.getId()+"&notEnoughCash";
+        } else {
+            String nowPayday = company.getPaydayDate();
+            String[] nowPaydayArraySplitted = nowPayday.split("-");
+            String newPayDay = "";
+            int paydayMonthPlusOne = Integer.parseInt(nowPaydayArraySplitted[1])+1;
+            if(Integer.parseInt(nowPaydayArraySplitted[1])<10){
+                newPayDay = nowPaydayArraySplitted[0]+"-0"+String.valueOf(paydayMonthPlusOne)+"-"+nowPaydayArraySplitted[2];
+            }
+            if(paydayMonthPlusOne>12){
+                paydayMonthPlusOne=1;
+                int paydayYearPlusOne = Integer.parseInt(nowPaydayArraySplitted[0])+1;
+                nowPaydayArraySplitted[0] = String.valueOf(paydayYearPlusOne);
+                newPayDay = nowPaydayArraySplitted[0]+"-0"+String.valueOf(paydayMonthPlusOne)+"-"+nowPaydayArraySplitted[2];
+
+            } else {
+                newPayDay = nowPaydayArraySplitted[0]+"-"+String.valueOf(paydayMonthPlusOne)+"-"+nowPaydayArraySplitted[2];
+            }
+            company.setPaydayDate(newPayDay);
+            int nowProfit = company.getProfit();
+            company.setProfit(nowProfit-paydayFullSum);
+            for (Worker worker : companyWorkers) {
+                Salary salary = new Salary();
+                salary.setDate(company.getPaydayDate());
+                YearMonth yearMonthObject = YearMonth.of(year, month);
+                int daysInMonth = yearMonthObject.lengthOfMonth();
+                int workerPaycheckPerDay = worker.getSalary()/daysInMonth;
+                salary.setPaycheckPerDay(workerPaycheckPerDay);
+                int workerPaycheckFull = worker.getMonthWorkedDays()*workerPaycheckPerDay;
+                salary.setSalarySum(workerPaycheckFull);
+                salary.setWorkedDays(worker.getMonthWorkedDays());
+                salary.setWorker(worker);
+                worker.setMonthWorkedDays(0);
+                workerRepository.save(worker);
+                salaryRepository.save(salary);
+            }
+            companyRepository.save(company);
+        }
+        return "redirect:/income-page?id="+company.getId()+"&salaryPayOk";
+    }
+
+    @RequestMapping("/deleteIncome")
+    public String deleteIncome(Principal principal, Long id){
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        Income income = incomeRepository.getOne(id);
+        int nowIncome = company.getIncome();
+        int nowProfit = company.getProfit();
+        company.setIncome(nowIncome-income.getIncomePrice());
+        company.setProfit(nowProfit-income.getIncomePrice());
+        incomeRepository.deleteById(id);
+        companyRepository.save(company);
+        return "redirect:/income-page?id="+company.getId()+"&incomeDeleted";
+    }
+
+    @RequestMapping("/hideIncome")
+    public String hideIncome(Principal principal, Long id){
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        incomeRepository.deleteById(id);
+        return "redirect:/income-page?id="+company.getId()+"&incomeHided";
     }
 }

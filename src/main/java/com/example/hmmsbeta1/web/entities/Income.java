@@ -13,7 +13,8 @@ public class Income {
     private Company company;
     @Column
     private String incomeDescription;
-    @Column int incomePrice;
+    @Column
+    int incomePrice;
     @Column
     private String incomeDate;
 
