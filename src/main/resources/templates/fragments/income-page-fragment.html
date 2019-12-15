@@ -76,7 +76,7 @@
                     Въведете датата, за която искате да видите наличните приходи:
                     <form action="/income-by-date" method="get">
                         <input type="date" class="form-control" name="incomeDay" required id="incomeDay"
-                               title="Въведете ден за изплащане на на заплати до персонала">
+                               title="Въведете ден за търсене">
                         <p>
                         <p>
                             <button class="btn btn-sm btn-success" type="submit"><i
@@ -142,40 +142,6 @@
                             </div>
                         </form>
                         <hr>
-                        <div th:switch="${paydayDate}">
-                            <span th:case="'0'">
-                                Днес не е дата за изплащане на заплати и опцията е неактивна!
-                                 <div class="form-group">
-                                <div class="col-xs-12">
-                                    <br>
-                                    <button type="button" class="btn btn-lg btn-success"
-                                            disabled>Изплати заплатите</button>
-                                </div>
-                            </div>
-                            </span>
-                            <span th:case="*">
-                                Трябва да изплатите заплатите на работниците си <b><span
-                                    style="color: #BF2E2E;">ДНЕС!</span></b> Дължите
-                                <b><span id="salarySum" style="color: #BF2E2E;" th:text="${paydaySum}"></span><span
-                                        style="color: #BF2E2E;">лв.</span></b>
-                                <form action="/salaries-pay" method="post">
-                                    <div class="form-group">
-                                    <div class="col-xs-12">
-                                    <br>
-                                    <button class="btn btn-lg btn-success" type="submit" onclick="sendSаlariesConfirm()"><i
-                                            class="glyphicon glyphicon-ok-sign"></i> Изплати заплатите!
-                                    </button>
-                                    </div>
-                                    </div>
-                                    <script>
-                                    function sendSаlariesConfirm() {
-                                        var sum = document.getElementById("salarySum").innerText;
-                                    confirm("От общия Ви доход ще бъдат премахнати "+sum+" лв. Потвърждавате ли, че искате да изплатите заплатите?");
-                                    }
-                                    </script>
-                                </form>
-                            </span>
-                        </div>
                     </div><!--/tab-pane-->
 
                 </div><!--/tab-content-->

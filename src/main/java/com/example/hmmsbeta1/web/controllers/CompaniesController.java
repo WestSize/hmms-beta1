@@ -4,12 +4,11 @@ import com.example.hmmsbeta1.web.entities.*;
 import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
 import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
 import com.example.hmmsbeta1.web.repositories.IncomeRepositories.IncomeRepository;
+import com.example.hmmsbeta1.web.repositories.OutcomeRepositories.OutcomeRepository;
 import com.example.hmmsbeta1.web.repositories.SalaryRepositories.SalaryRepository;
 import com.example.hmmsbeta1.web.repositories.WorkScheduleRepositories.WorkScheduleRepository;
 import com.example.hmmsbeta1.web.repositories.WorkerRepositories.WorkerRepository;
-import com.example.hmmsbeta1.web.repositories.MessagesRepositories.MessageRepository;
 import com.example.hmmsbeta1.web.repositories.UserRepository;
-import com.example.hmmsbeta1.web.services.PrivateMessagesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -63,6 +62,9 @@ public class CompaniesController {
     @Autowired
     private SalaryRepository salaryRepository;
 
+    @Autowired
+    private OutcomeRepository outcomeRepository;
+
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
 
     private Long companyId = null;
@@ -92,10 +94,12 @@ public class CompaniesController {
         company.setUser(user);
         company.setNumberOfOffices(0);
         company.setNumberOfWorkers(0);
+        company.setPaydayDate(formatter.format(date));
         company.setProfit((company.getIncome() - company.getInvestment()));
         company.setCircularLetter("Здравейте! Поканен сте на интервю за работата, която сте кандидатствали" +
                 " във фирмата '" + company.getName() + "'. Моля напишете ни удобен ден и час за среща в наш офис или " +
                 "се свържете с нас на тел: (не е зададен). Поздрави, " + user.getFirstName() + " " + user.getLastName() + " (управител). :)");
+        company.setOutcome(0);
         user.setWorkingStatus("owner");
         companyRepository.save(company);
         Income income = new Income();
@@ -280,6 +284,38 @@ public class CompaniesController {
         return "redirect:/company-page?id=" + company.getId();
     }
 
+    @RequestMapping(value = "/fire")
+    public String fireWorker(Long id, Principal principal){
+        User me = userRepository.findByEmail(principal.getName());
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        Worker worker = workerRepository.getOne(id);
+        if(!me.getWorkingStatus().equals("owner")){
+            return "redirect:/comapny-home?notOwner";
+        } else if (!worker.getCompany().equals(company)){
+            return "redirect:/company-home?notYourCompany";
+        }
+        User workerUser = worker.getUser();
+        List<Salary> allWorkerSalaries = salaryRepository.showWorkerSalariesByWorkerId(worker.getId());
+        if (!allWorkerSalaries.isEmpty()) {
+            for (Salary salary : allWorkerSalaries) {
+                salaryRepository.deleteById(salary.getId());
+            }
+        }
+        List<WorkSchedule> workerSchedules = workScheduleRepository.showAllWorkScheduleByUserId(workerUser.getId());
+        if(!workerSchedules.isEmpty()) {
+            for (WorkSchedule workerSchedule : workerSchedules) {
+                workScheduleRepository.deleteById(workerSchedule.getId());
+            }
+        }
+        workerRepository.deleteById(id);
+        workerUser.setWorkingStatus("guest");
+        userRepository.save(workerUser);
+        int companyNowWorkers = company.getNumberOfWorkers();
+        company.setNumberOfWorkers(companyNowWorkers-1);
+        companyRepository.save(company);
+        return "redirect:/company-page?id="+company.getId()+"&workerDeleted";
+    }
+
     @RequestMapping(value = "/company-workschedule", method = RequestMethod.GET)
     public String workSchedule(Model model, Principal principal, Long id, @RequestParam("workScheduleDay") String searchingDay) {
         model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
@@ -334,13 +370,11 @@ public class CompaniesController {
                     }
                 }
                 if (worker == null) {
-//                return "redirect:/create-work-schedule?noSuchUser";
                     notConfirmedUser = true;
                     nowUserNotConfirmed = true;
                 } else if (!worker.getCompany().getId().equals(company.getId())) {
                     notConfirmedUser = true;
                     nowUserNotConfirmed = true;
-//                return "redirect:/create-work-schedule?noSuchWorker";
                 }
                 if (!nowUserNotConfirmed) {
                     confirmedUsersCounter++;
@@ -424,7 +458,18 @@ public class CompaniesController {
     @RequestMapping(value = "/report-view", method = RequestMethod.GET)
     public String workReportView(long id, Model model, Principal principal) {
         model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        model.addAttribute("workScheduleInfo", workScheduleRepository.getOne(id));
+        WorkSchedule workSchedule = workScheduleRepository.getOne(id);
+        User me = userRepository.findByEmail(principal.getName());
+        if(!me.getWorkingStatus().equals("owner")) {
+            Worker worker = workerRepository.showWorkerByUserId(me.getId());
+            if (workSchedule.getWorker().equals(worker)) {
+                model.addAttribute("workScheduleInfo", workSchedule);
+                return "work-schedule-report-view";
+            } else {
+                return "redirect:/company-home?notYourWorkSchedule";
+            }
+        }
+        model.addAttribute("workScheduleInfo", workSchedule);
         return "work-schedule-report-view";
     }
 
@@ -466,54 +511,15 @@ public class CompaniesController {
             return "redirect:/company-home?notYourCompany";
         } else {
             model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-            model.addAttribute("companyIncomesCounter", incomeRepository.showLast12IncomesByCompanyId(id).size());
+            model.addAttribute("companyIncomesCounter", incomeRepository.showAllIncomesByCompanyId(id).size());
             model.addAttribute("companyIncomes", incomeRepository.showLast12IncomesByCompanyId(id));
             model.addAttribute("fullIncomeCash", company.getIncome());
-            String[] payDayDateSplittedArray = company.getPaydayDate().split("-");
-            String payDayDateSplittedString = null;
-            for (int j = 0; j < payDayDateSplittedArray.length; j++) {
-                if (j == 0) {
-                    payDayDateSplittedString = payDayDateSplittedArray[j];
-                } else {
-                    payDayDateSplittedString += payDayDateSplittedArray[j];
-                }
-            }
-            String[] nowDateSplittedArray = nowDate.split("-");
-            String nowDateSplittedString = null;
-            for (int k = 0; k < nowDateSplittedArray.length; k++) {
-                if (k == 0) {
-                    nowDateSplittedString = nowDateSplittedArray[k];
-                } else {
-                    nowDateSplittedString += nowDateSplittedArray[k];
-                }
-            }
-            int payDayDate = Integer.parseInt(payDayDateSplittedString);
-            int nowDateInt = Integer.parseInt(nowDateSplittedString);
-            if(nowDateInt>=payDayDate) {
-                model.addAttribute("paydayDate", company.getPaydayDate());
-                int paydayFullSum = 0;
-                List<Worker> companyWorkers = workerRepository.showWorkersByCompanyId(company.getId());
-                String[] nowYearAndMonth = nowDate.split("-");
-                int year = Integer.parseInt(nowYearAndMonth[0]);
-                int month = Integer.parseInt(nowYearAndMonth[1]);
-                for (Worker companyWorker : companyWorkers) {
-                    YearMonth yearMonthObject = YearMonth.of(year, month);
-                    int daysInMonth = yearMonthObject.lengthOfMonth();
-                    int workerPaycheckPerDay = companyWorker.getSalary()/daysInMonth;
-                    int workerPaycheckFull = companyWorker.getMonthWorkedDays()*workerPaycheckPerDay;
-                    paydayFullSum += workerPaycheckFull;
-                }
-                model.addAttribute("paydaySum", paydayFullSum);
-            } else {
-                model.addAttribute("paydayDate", "0");
-            }
             return "/income-page";
         }
     }
 
     @RequestMapping(value = "/income-page", method = RequestMethod.POST)
     public String insertIncome(Model model, Principal principal, Income income){
-//        User me = userRepository.findByEmail(principal.getName());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
         Company company = companyRepository.showOneUserCompany(principal.getName());
@@ -600,8 +606,14 @@ public class CompaniesController {
                 salaryRepository.save(salary);
             }
             companyRepository.save(company);
+            Outcome outcome = new Outcome();
+            outcome.setOutcomePrice(paydayFullSum);
+            outcome.setOutcomeDate(nowDate);
+            outcome.setCompany(company);
+            outcome.setOutcomeDescription("Изплащане на заплати в размер на "+paydayFullSum+" лв.");
+            outcomeRepository.save(outcome);
         }
-        return "redirect:/income-page?id="+company.getId()+"&salaryPayOk";
+        return "redirect:/outcomes?id="+company.getId()+"&salaryPayOk";
     }
 
     @RequestMapping("/deleteIncome")
@@ -622,5 +634,109 @@ public class CompaniesController {
         Company company = companyRepository.showOneUserCompany(principal.getName());
         incomeRepository.deleteById(id);
         return "redirect:/income-page?id="+company.getId()+"&incomeHided";
+    }
+
+    @RequestMapping(value = "/outcomes", method = RequestMethod.GET)
+    public String getOutcomesPage(Principal principal, Model model, Long id){
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        User me = userRepository.findByEmail(principal.getName());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
+        String nowDate = formatter.format(date);
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        if(!company.getUser().equals(me)){
+            return "redirect:/company-home?notYourCompany";
+        }
+        model.addAttribute("outcomesCounter", outcomeRepository.findAllOutcomesByCompanyId(id).size());
+        model.addAttribute("CompanyOutcomes", outcomeRepository.findLast12OutcomesByCompanyId(id));
+        model.addAttribute("fullOutcomeCash", company.getOutcome());
+        String[] payDayDateSplittedArray = company.getPaydayDate().split("-");
+        String payDayDateSplittedString = null;
+        for (int j = 0; j < payDayDateSplittedArray.length; j++) {
+            if (j == 0) {
+                payDayDateSplittedString = payDayDateSplittedArray[j];
+            } else {
+                payDayDateSplittedString += payDayDateSplittedArray[j];
+            }
+        }
+        String[] nowDateSplittedArray = nowDate.split("-");
+        String nowDateSplittedString = null;
+        for (int k = 0; k < nowDateSplittedArray.length; k++) {
+            if (k == 0) {
+                nowDateSplittedString = nowDateSplittedArray[k];
+            } else {
+                nowDateSplittedString += nowDateSplittedArray[k];
+            }
+        }
+        int payDayDate = Integer.parseInt(payDayDateSplittedString);
+        int nowDateInt = Integer.parseInt(nowDateSplittedString);
+        if(nowDateInt>=payDayDate) {
+            model.addAttribute("paydayDate", company.getPaydayDate());
+            int paydayFullSum = 0;
+            List<Worker> companyWorkers = workerRepository.showWorkersByCompanyId(company.getId());
+            String[] nowYearAndMonth = nowDate.split("-");
+            int year = Integer.parseInt(nowYearAndMonth[0]);
+            int month = Integer.parseInt(nowYearAndMonth[1]);
+            for (Worker companyWorker : companyWorkers) {
+                YearMonth yearMonthObject = YearMonth.of(year, month);
+                int daysInMonth = yearMonthObject.lengthOfMonth();
+                int workerPaycheckPerDay = companyWorker.getSalary()/daysInMonth;
+                int workerPaycheckFull = companyWorker.getMonthWorkedDays()*workerPaycheckPerDay;
+                paydayFullSum += workerPaycheckFull;
+            }
+            model.addAttribute("paydaySum", paydayFullSum);
+        } else {
+            model.addAttribute("paydayDate", "0");
+        }
+        return "outcome-page";
+    }
+
+    @RequestMapping(value = "/outcomes", method = RequestMethod.POST)
+    public String addOutCome(Principal principal, Model model, Outcome outcome){
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
+        outcome.setCompany(company);
+        outcome.setOutcomeDate(formatter.format(date));
+        outcomeRepository.save(outcome);
+        int companyNowProfit = company.getProfit();
+        company.setProfit(companyNowProfit-outcome.getOutcomePrice());
+        int companyNowOutcome = company.getOutcome();
+        company.setOutcome(companyNowOutcome+outcome.getOutcomePrice());
+        companyRepository.save(company);
+        return "redirect:/outcomes?id="+company.getId()+"&outcomeAdded";
+    }
+    @RequestMapping(value = "/outcomes-by-date", method = RequestMethod.GET)
+    public String findOutcomesByDate(Principal principal, Model model, @RequestParam("outcomeDay") String outcomeDay){
+        User me = userRepository.findByEmail(principal.getName());
+        if (!me.getWorkingStatus().equals("owner")){
+            return "redirect:/company-home?notOwner";
+        }
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("outcomesCounter", outcomeRepository.findOutcomesByCompanyIdAndDate(company.getId(), outcomeDay).size());
+        model.addAttribute("outcomesList", outcomeRepository.findOutcomesByCompanyIdAndDate(company.getId(), outcomeDay));
+        model.addAttribute("outcomeDay", outcomeDay);
+        return "outcomes-by-date";
+    }
+
+    @RequestMapping("/deleteoutcome")
+    public String deleteOutcome(Principal principal, Long id){
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        Outcome outcome = outcomeRepository.getOne(id);
+        int nowOutcome = company.getOutcome();
+        int nowProfit = company.getProfit();
+        company.setOutcome(nowOutcome-outcome.getOutcomePrice());
+        company.setProfit(nowProfit+outcome.getOutcomePrice());
+        outcomeRepository.deleteById(id);
+        companyRepository.save(company);
+        return "redirect:/outcomes?id="+company.getId()+"&outcomeDeleted";
+    }
+
+    @RequestMapping("/hideoutcome")
+    public String hideOutcome(Principal principal, Long id){
+        Company company = companyRepository.showOneUserCompany(principal.getName());
+        outcomeRepository.deleteById(id);
+        return "redirect:/outcomes?id="+company.getId()+"&outcomeHided";
     }
 }

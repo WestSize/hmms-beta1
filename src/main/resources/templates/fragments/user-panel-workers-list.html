@@ -175,7 +175,7 @@
                                     <td th:text="${worker.getSalary()}">Заплата</td>
                                             <!--                                                <td><a th:href="@{/worker-page(id=${company.id})}" th:text="${company.name}">Име</a></td>&ndash;&gt;-->
                                     <td><a th:href="@{/user-page(id=${worker.getUser().getId()})}">Преглед</a></td>
-                                    <td><a th:href="@{/view-logs(id=${worker.getUser().getId()})}">Виж раобтния дневник</a> / <a th:href="@{/deleteApplication(id=${worker.getId()})}"><img src="images/delete.png" width="20px" title="Уволни работника"/></a></td>
+                                    <td><a th:href="@{/view-logs(id=${worker.getUser().getId()})}">Виж раобтния дневник</a> / <a th:href="@{/fire(id=${worker.getId()})}"><img src="images/delete.png" width="20px" title="Уволни работника"/></a></td>
                                 </tr>
                                 </tbody>
                             </table>

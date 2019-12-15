@@ -34,6 +34,8 @@ public class Company {
     private String circularLetter;
     @Column(name="payday_date")
     private String paydayDate;
+    @Column
+    private int outcome;
 
 //    @OneToMany(fetch = FetchType.LAZY, mappedBy = "company")
 //    private List<Worker> workers;
@@ -137,11 +139,11 @@ public class Company {
         this.paydayDate = paydayDate;
     }
 
-    //    public List<Worker> getWorkers() {
-//        return workers;
-//    }
-//
-//    public void setWorkers(List<Worker> workers) {
-//        this.workers = workers;
-//    }
+    public int getOutcome() {
+        return outcome;
+    }
+
+    public void setOutcome(int outcome) {
+        this.outcome = outcome;
+    }
 }
