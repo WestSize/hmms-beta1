@@ -137,8 +137,10 @@
                             </button>
                     </form>
                     <p>
-                    <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <img
-                        src="images/edit.png" width="12px" title="Редактирай"/>
+                    <h4>Брой офиси:</h4> <span th:text="${companyInfo.numberOfOffices}"></span> <a
+                        th:href="@{/offices(id=${companyInfo.getId()})}"><img src="images/edit.png"
+                                                                                  width="12px"
+                                                                                  title="Редактирай"/></a>
                     <p>
                     <h4>Моментен доход:</h4> <span th:text="${companyInfo.income}"></span> лв. <a
                         th:href="@{/income-page(id=${companyInfo.getId()})}"><img src="images/edit.png"

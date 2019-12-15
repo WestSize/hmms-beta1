@@ -4,6 +4,7 @@ import com.example.hmmsbeta1.web.entities.*;
 import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
 import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
 import com.example.hmmsbeta1.web.repositories.IncomeRepositories.IncomeRepository;
+import com.example.hmmsbeta1.web.repositories.OfficeRepositories.OfficeRepository;
 import com.example.hmmsbeta1.web.repositories.OutcomeRepositories.OutcomeRepository;
 import com.example.hmmsbeta1.web.repositories.SalaryRepositories.SalaryRepository;
 import com.example.hmmsbeta1.web.repositories.WorkScheduleRepositories.WorkScheduleRepository;
@@ -65,6 +66,9 @@ public class CompaniesController {
     @Autowired
     private OutcomeRepository outcomeRepository;
 
+    @Autowired
+    private OfficeRepository officeRepository;
+
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
 
     private Long companyId = null;
@@ -94,6 +98,9 @@ public class CompaniesController {
         User user = userRepository.findByEmail(principal.getName());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
+        if(company.getInvestment()<0){
+            return "redirect:/company-home?noMinusError";
+        }
         company.setUser(user);
         company.setNumberOfOffices(0);
         company.setNumberOfWorkers(0);
@@ -189,6 +196,9 @@ public class CompaniesController {
         oldCompany.setDescription(company.getDescription());
         oldCompany.setPhoneNumber(company.getPhoneNumber());
         oldCompany.setPaydayDate(company.getPaydayDate());
+        if (company.getInvestment()<0){
+            return "redirect:/company-home?noMinusError";
+        }
         oldCompany.setInvestment(company.getInvestment());
         companyRepository.save(oldCompany);
         return "redirect:/company-page?id=" + oldCompany.getId();
@@ -537,6 +547,9 @@ public class CompaniesController {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
         Company company = companyRepository.showOneUserCompany(principal.getName());
+        if(income.getIncomePrice()<0){
+            return "redirect:/income-page?id="+company.getId()+"&noMinusError";
+        }
         income.setCompany(company);
         income.setIncomeDate(formatter.format(date));
         incomeRepository.save(income);
@@ -708,6 +721,9 @@ public class CompaniesController {
     @RequestMapping(value = "/outcomes", method = RequestMethod.POST)
     public String addOutCome(Principal principal, Model model, Outcome outcome){
         Company company = companyRepository.showOneUserCompany(principal.getName());
+        if(outcome.getOutcomePrice()<0){
+            return "redirect:/outcomes?id="+company.getId()+"&noMinusError";
+        }
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
         outcome.setCompany(company);
@@ -752,5 +768,23 @@ public class CompaniesController {
         Company company = companyRepository.showOneUserCompany(principal.getName());
         outcomeRepository.deleteById(id);
         return "redirect:/outcomes?id="+company.getId()+"&outcomeHided";
+    }
+
+    @RequestMapping(value = "/offices", method = RequestMethod.GET)
+    public String showOffices(Principal principal, Model model, Long id){
+        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        User me = userRepository.findByEmail(principal.getName());
+        Company company = companyRepository.getOne(id);
+        if(!me.getWorkingStatus().equals("owner")){
+            return "redirect:/company-home?notOwner";
+        } else if (!me.equals(company.getUser())){
+            return "redirect:/company-home?notYourCompany2";
+        }
+        List<Office> companyOffices = officeRepository.showOfficesByCompanyId(id);
+        model.addAttribute("companyOfficesCounter", companyOffices.size());
+        model.addAttribute("comapnyOffices", companyOffices);
+        model.addAttribute("companyInfo", company);
+        model.addAttribute("me", me);
+        return "offices";
     }
 }

@@ -67,6 +67,10 @@
                         <div th:if="${param.salaryPayOk}">
                             <div class="alert alert-success">Заплатите бяха платени успешно.</div>
                         </div>
+                        <div th:if="${param.noMinusError}">
+                            <div class="alert alert-danger">Няма как да добавите отрицателно число.
+                            </div>
+                        </div>
                         <div th:switch="${outcomesCounter}">
                         <span th:case="'0'">Няма налични разходи до тази дата.
                         <p>

@@ -59,6 +59,10 @@
                             <div class="alert alert-danger">Фирмата няма достатъчно пари, за да изплати заплатите си.
                             </div>
                         </div>
+                        <div th:if="${param.noMinusError}">
+                            <div class="alert alert-danger">Няма как да добавите отрицателно число за приход.
+                            </div>
+                        </div>
                         <div th:if="${param.salaryPayOk}">
                             <div class="alert alert-success">Ти успешно плати заплатите на своите работници.</div>
                         </div>

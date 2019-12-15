@@ -66,6 +66,9 @@
                         <div th:if="${param.notYourCompany2}">
                             <div class="alert alert-danger">Тази фирма не е ваша, за да използвате тази страница.</div>
                         </div>
+                        <div th:if="${param.noMinusError}">
+                            <div class="alert alert-danger">Няма как да сложите отрицателно число.</div>
+                        </div>
                         <div th:if="${param.notWorker}">
                             <div class="alert alert-danger">Вие не сте работник, за да използвате тази страница.</div>
                         </div>
