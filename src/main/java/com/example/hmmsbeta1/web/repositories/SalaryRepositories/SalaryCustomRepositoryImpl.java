@@ -17,4 +17,11 @@ public class SalaryCustomRepositoryImpl implements SalaryCustomRepository {
         query.setParameter(1, id);
         return query.getResultList();
     }
+
+    @Override
+    public List<Salary> showLast12WorkerSalariesByWorkerId(Long id) {
+        Query query = entityManager.createNativeQuery("select em.* from salaries as em where em.worker_id like ? ORDER BY em.id DESC LIMIT 12", Salary.class);
+        query.setParameter(1, id);
+        return query.getResultList();
+    }
 }

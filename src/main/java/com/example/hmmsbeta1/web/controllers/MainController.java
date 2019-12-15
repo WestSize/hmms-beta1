@@ -50,6 +50,8 @@ public class MainController {
 
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads/avatars";
 
+    private Long workerUserId = null;
+
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView home(Model model, Principal principal) {
         model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
@@ -120,6 +122,8 @@ public class MainController {
             if (me.getWorkingStatus().equals("owner") && userCompany.equals(companyRepository.showOneUserCompany(principal.getName()))) {
                 model.addAttribute("userinfo", userRepository.getOne(id));
                 model.addAttribute("companyDetails", userCompany);
+                model.addAttribute("workerDetails", worker);
+                workerUserId = worker.getUser().getId();
                 return "/user-page-owner";
             } else {
                 model.addAttribute("userinfo", userRepository.getOne(id));
@@ -127,8 +131,8 @@ public class MainController {
                 return "/user-page";
             }
         } else {
-            Company userCompany = companyRepository.showOneUserCompany(user.getEmail());
             if(user.getWorkingStatus().equals("owner")){
+                Company userCompany = companyRepository.showOneUserCompany(user.getEmail());
                 model.addAttribute("userinfo", userRepository.getOne(id));
                 model.addAttribute("companyDetails", userCompany);
                 return "/user-page";
@@ -137,5 +141,26 @@ public class MainController {
                 return "/user-page";
             }
         }
+    }
+    @RequestMapping(value = "/user-page", method = RequestMethod.POST)
+    public String editWorkerData(Worker worker){
+        Long nowId = workerUserId;
+        Worker workerOld = workerRepository.showWorkerByUserId(workerUserId);
+        workerUserId = null;
+        workerOld.setPosition(worker.getPosition());
+        workerOld.setSalary(worker.getSalary());
+        workerRepository.save(workerOld);
+        return "redirect:/user-page?id="+nowId+"&workerUpdated";
+    }
+
+    @RequestMapping(value = "/add-dayoff", method = RequestMethod.POST)
+    public String addDayOff(Principal principal, Worker workerNew){
+        Worker worker = workerRepository.showWorkerByUserId(workerUserId);
+        Long nowId = workerUserId;
+        workerUserId = null;
+        int nowWorkedDays = worker.getMonthWorkedDays();
+        worker.setMonthWorkedDays(nowWorkedDays+workerNew.getMonthWorkedDays());
+        workerRepository.save(worker);
+        return "redirect:/user-page?id="+nowId+"&workerDayoffAdded";
     }
 }

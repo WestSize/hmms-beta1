@@ -21,6 +21,12 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="hero-text">
+                                                <div th:if="${param.workerUpdated}">
+                                                    <div class="alert alert-success">Успешно променихте данните на работника.</div>
+                                                </div>
+                                                <div th:if="${param.workerDayoffAdded}">
+                                                    <div class="alert alert-success">Успешно добавихте почивни/болнични дни на работника.</div>
+                                                </div>
                                                 <h2><span th:text="${userinfo.getFirstName()}"></span> <span
                                                         th:text="${userinfo.getLastName()}"></span></h2>
                                                 <p><span th:text="${userinfo.getDescription()}"></span></p>
@@ -59,13 +65,64 @@
                                 </div>
                             </div>
                         </div>
-                        ижан
+                        <hr>
+                        <form action="/user-page" method="post">
+                            <div class="col-xs-6">
+                                <h4>Променете позицията на работника:</h4>
+                                <input type="text" class="form-control" required name="position" id="position"
+                                       th:value="${workerDetails.getPosition()}"
+                                       title="Въведете нова позиция на работника">
+                            </div>
+                            <div class="col-xs-6">
+                                <h4>Променете заплатата на работника:</h4>
+                                <input type="number" class="form-control" required name="salary" id="salary"
+                                       th:value="${workerDetails.getSalary()}"
+                                       title="Въведете нова позиция на работника">
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <br>
+                                    <button class="btn btn-lg btn-success" type="submit"><i
+                                            class="glyphicon glyphicon-ok-sign"></i> Запази
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <hr>
+                        <form action="/add-dayoff" method="post">
+                            <div class="col-xs-6">
+                                <h4>Добавете дни като платен отпуск или болничен:</h4>
+                                <input type="number" class="form-control" required name="monthWorkedDays"
+                                       id="monthWorkedDays"
+                                       title="Въведете нова позиция на работника">
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <br>
+                                    <div class="alert alert-info">Стойността на цифрата, която въведете горе, ще бъде
+                                        зададена
+                                        като платени изработени дни във текущия месец.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-xs-12">
+                                    <br>
+                                    <button class="btn btn-lg btn-primary" type="submit"><i
+                                            class="glyphicon glyphicon-ok-sign"></i> Запази
+                                    </button> <a th:href="@{/fire(id=${workerDetails.getId()})}" onclick="fireUser()" class="btn btn-lg btn-danger">Уволни работника</a>
+                                </div>
+                            </div>
+                        </form>
+                        <script>
+                            function fireUser() {
+                                confirm("Сигурни ли сте, че искате да уволните работника?");
+                            }
+                        </script>
                     </section>
                     <!-- Hero section end -->
                 </div><!--/tab-pane-->
-
             </div><!--/tab-content-->
-
         </div><!--/col-9-->
     </div><!--/row-->
 

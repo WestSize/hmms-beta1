@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface SalaryCustomRepository {
     List<Salary> showWorkerSalariesByWorkerId(Long id);
+    List<Salary> showLast12WorkerSalariesByWorkerId(Long id);
 }

@@ -82,6 +82,9 @@ public class CompaniesController {
             model.addAttribute("workerInfo", workerRepository.showWorkerByUserId(me.getId()));
             model.addAttribute("myWorkSchedulesCounter", workScheduleRepository.showLast12WorkSchedulesByUserId(me.getId()).size());
             model.addAttribute("myWorkSchedule", workScheduleRepository.showLast12WorkSchedulesByUserId(me.getId()));
+            Worker worker = workerRepository.showWorkerByUserId(me.getId());
+            model.addAttribute("salariesCounter", salaryRepository.showLast12WorkerSalariesByWorkerId(worker.getId()).size());
+            model.addAttribute("lastSalaries", salaryRepository.showLast12WorkerSalariesByWorkerId(worker.getId()));
         }
         return new ModelAndView("company-home");
     }
@@ -476,6 +479,16 @@ public class CompaniesController {
     @RequestMapping(value = "/view-logs", method = RequestMethod.GET)
     public String viewUserLogs(long id, Model model, Principal principal) {
         model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        Worker worker = workerRepository.showWorkerByUserId(id);
+        User me = userRepository.findByEmail(principal.getName());
+        if(!me.getWorkingStatus().equals("owner")){
+            return "redirect:/company-home?notOwner";
+        } else {
+            Company company = companyRepository.showOneUserCompany(principal.getName());
+            if(!worker.getCompany().equals(company)){
+                return "redirect:/company-home?param.notYourCompany2";
+            }
+        }
         List<WorkSchedule> workSchedules = workScheduleRepository.showAllWorkScheduleByUserId(id);
         model.addAttribute("userLogs", workSchedules);
         List<WorkSchedule> endedWorks = new ArrayList<>();
@@ -491,6 +504,7 @@ public class CompaniesController {
         model.addAttribute("userLogsCounter", workSchedules.size());
         model.addAttribute("endedWorks", endedWorks.size());
         model.addAttribute("notEndedWorks", notEndedWorks.size());
+        model.addAttribute("monthWorkedDays", worker.getMonthWorkedDays());
         return "view-logs";
     }
 

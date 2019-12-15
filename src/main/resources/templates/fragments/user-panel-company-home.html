@@ -63,6 +63,9 @@
                         <div th:if="${param.notYourCompany}">
                             <div class="alert alert-danger">Тази фирма не е ваша, за да гледате приходите ѝ.</div>
                         </div>
+                        <div th:if="${param.notYourCompany2}">
+                            <div class="alert alert-danger">Тази фирма не е ваша, за да използвате тази страница.</div>
+                        </div>
                         <div th:if="${param.notWorker}">
                             <div class="alert alert-danger">Вие не сте работник, за да използвате тази страница.</div>
                         </div>
@@ -162,8 +165,13 @@
                                                 <td th:text="${company.numberOfOffices}">Брой офиси</td>
                                                 <td th:text="${company.profit}">лв</td>
                                                 <td><a th:href="@{/edit-company(id=${company.id})}"><img
-                                                        src="images/delete.png" width="25px" title="Закрий фирмата..."/> </a></td>
+                                                        src="images/delete.png" width="25px" onclick="deleteCompany()" title="Закрий фирмата..."/> </a></td>
                                         </tr>
+                                                                    <script>
+                                function deleteCompany() {
+                                    confirm("Сигурни ли сте, че искате да закриете фирмата?");
+                                }
+                                </script>
                                     </tbody>
                                 </table>
                             </span>
@@ -225,6 +233,37 @@
                                 </tbody>
                             </table>
                                         <small>* На таблицата се показват максимално до 12 смени!</small>
+                                    </span>
+                                </div>
+                                <hr>
+                                <div th:switch="${salariesCounter}">
+                                    <span th:case="'0'">
+                                        Вие нямате изплатени заплати до този момент.
+                                    </span>
+                                    <span th:case="*">
+                                        <h4 style="color: #BF2E2E;">Вашите последни смени:</h4>
+                                        <table class="table">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">Фиш №</th>
+                                    <th scope="col">Дата</th>
+                                    <th scope="col">Изплатени смени</th>
+                                    <th scope="col">Дневно заплащане в лв.</th>
+                                    <th scope="col">Обща сума в лв.</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="salary : ${lastSalaries}">
+                                    <td th:text="${salary.getId()}">фиш НО</td>
+                                    <td th:text="${salary.getDate()}">Дата</td>
+                                    <td th:text="${salary.getWorkedDays()}">смени</td>
+                                    <td th:text="${salary.getPaycheckPerDay()}">дневно</td>
+                                    <td th:text="${salary.getSalarySum()}">сума</td>
+
+                                </tr>
+                                </tbody>
+                            </table>
+                                         <small>* На таблицата се показват макс. последните Ви 12 заплати!</small>
                                     </span>
                                 </div>
                             </span>
