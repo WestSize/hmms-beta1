@@ -1,5 +1,6 @@
 package com.example.hmmsbeta1.web.services.OutcomeServices;
 
+import com.example.hmmsbeta1.web.entities.Company;
 import com.example.hmmsbeta1.web.entities.Outcome;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +10,9 @@ public interface OutcomeService {
     List<Outcome> findLast12OutcomesByCompanyId(Long id);
     List<Outcome> findAllOutcomesByCompanyId(Long id);
     List<Outcome> findOutcomesByCompanyIdAndDate(Long id, String date);
-    void save(Outcome outcome);
+    void save(Outcome outcome,Company company);
     Outcome getOne(Long id);
     List<Outcome> findAll();
     void deleteById(Long id);
+    void salariesPay(int SalariesSum, Company company, String date);
 }

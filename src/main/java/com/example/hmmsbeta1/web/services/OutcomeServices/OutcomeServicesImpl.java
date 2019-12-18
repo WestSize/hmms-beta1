@@ -1,10 +1,13 @@
 package com.example.hmmsbeta1.web.services.OutcomeServices;
 
+import com.example.hmmsbeta1.web.entities.Company;
 import com.example.hmmsbeta1.web.entities.Outcome;
 import com.example.hmmsbeta1.web.repositories.OutcomeRepositories.OutcomeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -31,7 +34,11 @@ public class OutcomeServicesImpl implements OutcomeService {
     }
 
     @Override
-    public void save(Outcome outcome) {
+    public void save(Outcome outcome, Company company) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
+        outcome.setCompany(company);
+        outcome.setOutcomeDate(formatter.format(date));
         outcomeRepository.save(outcome);
     }
 
@@ -50,5 +57,15 @@ public class OutcomeServicesImpl implements OutcomeService {
     @Override
     public void deleteById(Long id) {
         outcomeRepository.deleteById(id);
+    }
+
+    @Override
+    public void salariesPay(int SalariesSum, Company company, String date) {
+        Outcome outcome = new Outcome();
+        outcome.setOutcomePrice(SalariesSum);
+        outcome.setOutcomeDate(date);
+        outcome.setCompany(company);
+        outcome.setOutcomeDescription("Изплащане на заплати в размер на "+SalariesSum+" лв.");
+        outcomeRepository.save(outcome);
     }
 }

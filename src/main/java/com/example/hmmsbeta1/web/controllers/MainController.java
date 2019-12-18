@@ -140,9 +140,7 @@ public class MainController {
         Long nowId = workerUserId;
         Worker workerOld = workerService.showWorkerByUserId(workerUserId);
         workerUserId = null;
-        workerOld.setPosition(worker.getPosition());
-        workerOld.setSalary(worker.getSalary());
-        workerService.save(workerOld);
+        workerService.updateFromUserPage(worker, workerOld);
         return "redirect:/user-page?id="+nowId+"&workerUpdated";
     }
 
@@ -153,7 +151,8 @@ public class MainController {
         workerUserId = null;
         int nowWorkedDays = worker.getMonthWorkedDays();
         worker.setMonthWorkedDays(nowWorkedDays+workerNew.getMonthWorkedDays());
-        workerService.save(worker);
+        worker.setMonthWorkedDays(nowWorkedDays+workerNew.getMonthWorkedDays());
+        workerService.addDayOff(worker, workerNew);
         return "redirect:/user-page?id="+nowId+"&workerDayoffAdded";
     }
 }

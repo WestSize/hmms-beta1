@@ -3,6 +3,7 @@ package com.example.hmmsbeta1.web.services.WorkScheduleServices;
 import com.example.hmmsbeta1.web.entities.WorkSchedule;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 
 public interface WorkScheduleService {
@@ -14,4 +15,6 @@ public interface WorkScheduleService {
     WorkSchedule getOne(Long id);
     List<WorkSchedule> findAll();
     void deleteById(Long id);
+    String createWorkSchedule(String workers, String nowDate, WorkSchedule workScheduleNew, Principal principal);
+    String workReportPost(WorkSchedule workScheduleNew, WorkSchedule workScheduleOld);
 }

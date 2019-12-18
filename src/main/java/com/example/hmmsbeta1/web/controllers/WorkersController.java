@@ -60,9 +60,8 @@ public class WorkersController {
     @RequestMapping(value = "/workers-list", method = RequestMethod.POST)
     public String updateCircularLetter(Principal principal, Company company) {
         Company oldCompany = companyService.showOneUserCompany(principal.getName());
-        oldCompany.setCircularLetter(company.getCircularLetter());
         Long redirectId = oldCompany.getId();
-        companyService.save(oldCompany);
+        companyService.updateCircullarLetter(company, principal);
         return "redirect:/workers-list?id=" + redirectId;
     }
 
@@ -107,8 +106,6 @@ public class WorkersController {
     @RequestMapping(value = "/approveToWork", method = RequestMethod.POST)
     public String createNewWorker(Worker worker, Principal principal) {
         User user = userService.getOne(workerId);
-        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd'-'yyyy");
-        Date date = new Date(System.currentTimeMillis());
         List<Application> workersApplications = applicationService.showApplicationByCandidateId(workerId);
         workerId = null;
         for (int i = 0; i < workersApplications.size(); i++) {
@@ -118,14 +115,8 @@ public class WorkersController {
         user.setWorkingStatus("worker");
         userService.update(user);
         Company company = companyService.showOneUserCompany(principal.getName());
-        worker.setCompany(company);
-        worker.setUser(user);
-        worker.setDateOfAppointment(formatter.format(date));
-        worker.setOnDuty(false);
-        workerService.save(worker);
-        int companyWorkersCounter = company.getNumberOfWorkers();
-        company.setNumberOfWorkers(companyWorkersCounter + 1);
-        companyService.save(company);
+        workerService.save(worker, company, user);
+        companyService.setCompanyWorkersPlusOne(company);
         return "redirect:/company-page?id=" + company.getId();
     }
 
@@ -140,24 +131,10 @@ public class WorkersController {
             return "redirect:/company-home?notYourCompany";
         }
         User workerUser = worker.getUser();
-        List<Salary> allWorkerSalaries = salaryRepository.showWorkerSalariesByWorkerId(worker.getId());
-        if (!allWorkerSalaries.isEmpty()) {
-            for (Salary salary : allWorkerSalaries) {
-                salaryRepository.deleteById(salary.getId());
-            }
-        }
-        List<WorkSchedule> workerSchedules = workScheduleService.showAllWorkScheduleByUserId(workerUser.getId());
-        if(!workerSchedules.isEmpty()) {
-            for (WorkSchedule workerSchedule : workerSchedules) {
-                workScheduleService.deleteById(workerSchedule.getId());
-            }
-        }
-        workerService.deleteById(id);
+        workerService.fire(worker, workerUser, id);
         workerUser.setWorkingStatus("guest");
         userService.update(workerUser);
-        int companyNowWorkers = company.getNumberOfWorkers();
-        company.setNumberOfWorkers(companyNowWorkers-1);
-        companyService.save(company);
+        companyService.fireWorker(company);
         return "redirect:/company-page?id="+company.getId()+"&workerDeleted";
     }
 }

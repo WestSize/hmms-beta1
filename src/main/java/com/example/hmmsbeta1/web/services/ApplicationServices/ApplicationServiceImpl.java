@@ -1,16 +1,36 @@
 package com.example.hmmsbeta1.web.services.ApplicationServices;
 
 import com.example.hmmsbeta1.web.entities.Application;
+import com.example.hmmsbeta1.web.entities.Company;
+import com.example.hmmsbeta1.web.entities.User;
 import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
+import com.example.hmmsbeta1.web.services.CompanyServices.CompanyService;
+import com.example.hmmsbeta1.web.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
     @Autowired
     private ApplicationRepository applicationRepository;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private CompanyService companyService;
+
+    public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
+
+    private Long companyId = null;
 
     @Override
     public List showOnlyUsersCompanyApplications(Long id) {
@@ -48,8 +68,24 @@ public class ApplicationServiceImpl implements ApplicationService {
         return application;
     }
 
+//    @Override
+//    public void save(Application application) {
+//        applicationRepository.save(application);
+//    }
     @Override
-    public void save(Application application) {
+    public void save(MultipartFile[] files, Company company, Principal principal, Application application) throws IOException {
+        StringBuilder fileNames = new StringBuilder();
+        for (MultipartFile file : files) {
+            Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
+            fileNames.append(file.getOriginalFilename());
+            Files.write(fileNameAndPath, file.getBytes());
+        }
+        application.setApproved(false);
+        application.setInvited(false);
+        application.setCompanyId(companyId);
+        application.setCvPath(fileNames + "");
+        User user = userService.findByEmail(principal.getName());
+        application.setUser(user);
         applicationRepository.save(application);
     }
 
@@ -68,5 +104,18 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public void deleteById(Long id) {
         applicationRepository.deleteById(id);
+    }
+
+    @Override
+    public void updateToInvited(Application application, Principal principal, Long id) {
+        List <Application> applications = applicationRepository.showApplicationByCandidateId(id);
+        for (int i = 0; i < applications.size(); i++) {
+            Application nowApp = applications.get(i);
+            if(nowApp.getCompanyId().equals(companyService.showOneUserCompany(principal.getName()).getId())){
+                application = nowApp;
+            }
+        }
+        application.setInvited(true);
+        applicationRepository.save(application);
     }
 }

@@ -1,10 +1,13 @@
 package com.example.hmmsbeta1.web.services.SalaryServices;
 
+import com.example.hmmsbeta1.web.entities.Company;
 import com.example.hmmsbeta1.web.entities.Salary;
+import com.example.hmmsbeta1.web.entities.Worker;
 import com.example.hmmsbeta1.web.repositories.SalaryRepositories.SalaryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -33,7 +36,17 @@ public class SalaryServiceImpl implements SalaryService {
     }
 
     @Override
-    public void save(Salary salary) {
+    public void save(Company company, Worker worker, int year, int month) {
+        Salary salary = new Salary();
+        salary.setDate(company.getPaydayDate());
+        YearMonth yearMonthObject = YearMonth.of(year, month);
+        int daysInMonth = yearMonthObject.lengthOfMonth();
+        int workerPaycheckPerDay = worker.getSalary()/daysInMonth;
+        salary.setPaycheckPerDay(workerPaycheckPerDay);
+        int workerPaycheckFull = worker.getMonthWorkedDays()*workerPaycheckPerDay;
+        salary.setSalarySum(workerPaycheckFull);
+        salary.setWorkedDays(worker.getMonthWorkedDays());
+        salary.setWorker(worker);
         salaryRepository.save(salary);
     }
 

@@ -1,9 +1,8 @@
 package com.example.hmmsbeta1.web.controllers;
 
 import com.example.hmmsbeta1.web.entities.*;
-import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
-import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
-import com.example.hmmsbeta1.web.repositories.UserRepository;
+import com.example.hmmsbeta1.web.services.ApplicationServices.ApplicationService;
+import com.example.hmmsbeta1.web.services.CompanyServices.CompanyService;
 import com.example.hmmsbeta1.web.services.MessageServices.MessageService;
 import com.example.hmmsbeta1.web.services.PrivateConversationServices.PrivateConversationService;
 import com.example.hmmsbeta1.web.services.UserService;
@@ -14,9 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 @Controller
 public class MessagesController {
@@ -28,9 +24,9 @@ public class MessagesController {
     @Autowired
     private UserService userService;
     @Autowired
-    private ApplicationRepository applicationRepository;
+    private ApplicationService applicationService;
     @Autowired
-    private CompanyRepository companyRepository;
+    private CompanyService companyService;
 
     private Long replyId = null;
 
@@ -66,15 +62,8 @@ public class MessagesController {
         } else if (message.getUserRecipient().equals(principal.getName())){
             return "redirect:/new-message?noSelfPms";
         } else {
-            privateConversation.setUserSender(principal.getName());
-            privateConversation.setIsRecipientSeen(0);
-            //ot tuka pokazva neprochetenite suobshteni
-            userService.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages()+1);
-            privateConversation.setIsSenderSeen(1);
-            privateConversationService.saveMessage(privateConversation);
-            message.setPrivateConversation(privateConversation);
-            message.setUserSender(principal.getName());
-            messageService.save(message);
+            privateConversationService.saveMessage(principal.getName(), privateConversation);
+            messageService.save(message, privateConversation, principal);
             return "redirect:/new-message?success";
         }
     }
@@ -88,19 +77,18 @@ public class MessagesController {
         } else {
             PrivateConversation privateConversation = privateConversationService.getOne(id);
             if(principal.getName().equals(privateConversation.getUserSender())){
-                privateConversation.setIsSenderSeen(1);
                 int userUnreadedMessages=userService.findByEmail(principal.getName()).getUnreadedMessages();
                 if(userUnreadedMessages!=0) {
                     userService.findByEmail(principal.getName()).setUnreadedMessages(userUnreadedMessages-=1);
                 }
-                privateConversationService.saveMessage(privateConversation);
+                privateConversationService.setIsSenderSeen(privateConversation);
             } else if (principal.getName().equals(privateConversation.getUserRecipient())){
-                privateConversation.setIsRecipientSeen(1);
                 int userUnreadedMessages=userService.findByEmail(principal.getName()).getUnreadedMessages();
                 if(userUnreadedMessages!=0) {
                     userService.findByEmail(principal.getName()).setUnreadedMessages(userUnreadedMessages -= 1);
                 }
-                privateConversationService.saveMessage(privateConversation);
+//                privateConversationService.saveMessage(privateConversation);
+                privateConversationService.setIsRecipientSeen(privateConversation);
             }
             model.addAttribute("readConversation", privateConversationService.getOne(id));
             model.addAttribute("readMessages", messageService.findAllByPrivateConversationId(id));
@@ -114,22 +102,8 @@ public class MessagesController {
     private String replyMessage(Message message, Principal principal){
         PrivateConversation privateConversation = privateConversationService.getOne(replyId);
         replyId = null;
-        privateConversation.setDateAndTime(message.getDateAndTime());
-        message.setPrivateConversation(privateConversation);
-        if(privateConversation.getUserSender().equals(principal.getName())) {
-            message.setUserSender(principal.getName());
-            message.setUserRecipient(privateConversation.getUserRecipient());
-        } else {
-            message.setUserSender(principal.getName());
-            message.setUserRecipient(privateConversation.getUserSender());
-            privateConversation.setUserSender(principal.getName());
-            privateConversation.setUserRecipient(message.getUserRecipient());
-        }
-        privateConversation.setIsSenderSeen(1);
-        privateConversation.setIsRecipientSeen(0);
-        userService.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages()+1);
-        int userUnreadedMessages=userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages();
-        messageService.save(message);
+        privateConversationService.reply(privateConversation, message, principal);
+        messageService.reply(message, privateConversation);
         int conversationId = Math.toIntExact(message.getPrivateConversation().getId());
         return "redirect:/read-message?id="+conversationId;
     }
@@ -161,36 +135,12 @@ public class MessagesController {
 
     @RequestMapping(value = "/interview")
     public String inviteForInterviewViaPM(Long id, Principal principal) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy',' HH:mm");
-        Date date = new Date(System.currentTimeMillis());
         PrivateConversation privateConversation = new PrivateConversation();
-        privateConversation.setDateAndTime(formatter.format(date));
-        privateConversation.setUserSender(principal.getName());
-        privateConversation.setUserRecipient(userService.getOne(id).getEmail());
-        privateConversation.setMessageSubject("Покана за интервю за работа.");
-        privateConversation.setIsRecipientSeen(0);
-        //ot tuka pokazva neprochetenite suobshteni
-        userService.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages() + 1);
-        privateConversation.setIsSenderSeen(1);
-        privateConversationService.saveMessage(privateConversation);
-        Message message = new Message();
-        message.setPrivateConversation(privateConversation);
-        message.setUserSender(principal.getName());
-        message.setUserRecipient(userService.getOne(id).getEmail());
-        message.setMessageText(companyRepository.showOneUserCompany(principal.getName()).getCircularLetter());
-        message.setDateAndTime(formatter.format(date));
-        messageService.save(message);
-        List <Application> applications = applicationRepository.showApplicationByCandidateId(id);
+        privateConversationService.inviteForInterview(privateConversation,principal, id);
+        messageService.inviteForInterview(privateConversation, principal, id);
         Application application = new Application();
-        for (int i = 0; i < applications.size(); i++) {
-            Application nowApp = applications.get(i);
-            if(nowApp.getCompanyId().equals(companyRepository.showOneUserCompany(principal.getName()).getId())){
-                application = nowApp;
-            }
-        }
-        application.setInvited(true);
-        applicationRepository.save(application);
-        Long redirectId = companyRepository.showOneUserCompany(principal.getName()).getId();
+        applicationService.updateToInvited(application, principal, id);
+        Long redirectId = companyService.showOneUserCompany(principal.getName()).getId();
         return "redirect:/workers-list?id=" + redirectId;
     }
 

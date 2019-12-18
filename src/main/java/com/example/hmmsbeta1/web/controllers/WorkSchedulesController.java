@@ -62,80 +62,8 @@ public class WorkSchedulesController {
 
     @RequestMapping(value = "/create-work-schedule", method = RequestMethod.POST)
     public String workSchedulePost(@RequestParam("workersList") String workers, @RequestParam("nowDate") String nowDate, WorkSchedule workScheduleNew, Principal principal) {
-        String[] workersArray = workers.split(",\\s+");
-        Company company = companyService.showOneUserCompany(principal.getName());
-        boolean notConfirmedUser = false;
-        int confirmedUsersCounter = 0;
-        for (int i = 0; i < workersArray.length; i++) {
-            boolean nowUserNotConfirmed = false;
-            WorkSchedule workSchedule = new WorkSchedule();
-            User user = userService.findByEmail(workersArray[i]);
-            if (user == null || user == userService.findByEmail(principal.getName())) {
-//                return "redirect:/create-work-schedule?noSuchUser";
-                notConfirmedUser=true;
-                nowUserNotConfirmed=true;
-            }
-            if(!nowUserNotConfirmed) {
-                Worker worker = null;
-                List<Worker> allWorkers = workerService.findAll();
-                for (int j = 0; j < allWorkers.size(); j++) {
-                    Worker nowWorker = allWorkers.get(j);
-                    Long nowCompany = nowWorker.getCompany().getId();
-                    Long nowUser = nowWorker.getUser().getId();
-                    if (nowCompany.equals(company.getId()) && nowUser.equals(user.getId())) {
-                        worker = nowWorker;
-                    }
-                }
-                if (worker == null) {
-                    notConfirmedUser = true;
-                    nowUserNotConfirmed = true;
-                } else if (!worker.getCompany().getId().equals(company.getId())) {
-                    notConfirmedUser = true;
-                    nowUserNotConfirmed = true;
-                }
-                if (!nowUserNotConfirmed) {
-                    confirmedUsersCounter++;
-                    String[] workScheduleDateSplittedArray = workScheduleNew.getDate().split("-");
-                    String workScheduleDateSplittedString = null;
-                    for (int j = 0; j < workScheduleDateSplittedArray.length; j++) {
-                        if (j == 0) {
-                            workScheduleDateSplittedString = workScheduleDateSplittedArray[j];
-                        } else {
-                            workScheduleDateSplittedString += workScheduleDateSplittedArray[j];
-                        }
-                    }
-                    String[] nowDateSplittedArray = nowDate.split("-");
-                    String nowDateSplittedString = null;
-                    for (int k = 0; k < nowDateSplittedArray.length; k++) {
-                        if (k == 0) {
-                            nowDateSplittedString = nowDateSplittedArray[k];
-                        } else {
-                            nowDateSplittedString += nowDateSplittedArray[k];
-                        }
-                    }
-                    int workScheduleDate = Integer.parseInt(workScheduleDateSplittedString);
-                    int nowDateInt = Integer.parseInt(nowDateSplittedString);
-                    if (workScheduleDate < nowDateInt) {
-                        return "redirect:/create-work-schedule?noBackDate";
-                    }
-                    workSchedule.setDate(workScheduleNew.getDate());
-                    workSchedule.setWorker(worker);
-                    workSchedule.setWorkerDone(false);
-                    workSchedule.setCompany(company);
-                    workScheduleService.save(workSchedule);
-                } else {
-                    nowUserNotConfirmed = false;
-                }
-            }
-        }
-        if (notConfirmedUser) {
-            if(confirmedUsersCounter==0) {
-                return "redirect:/create-work-schedule?noSuchUser";
-            } else {
-                return "redirect:/create-work-schedule?missingWorkers";
-            }
-        }
-        return "redirect:/company-page?id=" + company.getId()+"&workScheduleOk";
+
+        return workScheduleService.createWorkSchedule(workers, nowDate, workScheduleNew, principal);
     }
 
     @RequestMapping(value = "/work-schedule-report", method = RequestMethod.GET)
@@ -163,13 +91,8 @@ public class WorkSchedulesController {
     public String workReportPost(@Valid WorkSchedule workScheduleNew) {
         WorkSchedule workScheduleOld = workScheduleService.getOne(workScheduleId);
         workScheduleId = null;
-        workScheduleOld.setWorkerDone(true);
-        workScheduleOld.setEndDateAndTime(workScheduleNew.getEndDateAndTime());
-        workScheduleOld.setWorkerReport(workScheduleNew.getWorkerReport());
-        int oldWorkedDays = workScheduleOld.getWorker().getMonthWorkedDays();
-        workScheduleOld.getWorker().setMonthWorkedDays(oldWorkedDays + 1);
-        workScheduleService.save(workScheduleOld);
-        return "redirect:/company-home?reportOk";
+
+        return workScheduleService.workReportPost(workScheduleNew, workScheduleOld);
     }
 
     @RequestMapping(value = "/report-view", method = RequestMethod.GET)

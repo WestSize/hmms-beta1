@@ -88,21 +88,13 @@ public class OutcomesController {
     }
 
     @RequestMapping(value = "/outcomes", method = RequestMethod.POST)
-    public String addOutCome(Principal principal, Model model, Outcome outcome){
+    public String addOutCome(Principal principal, Outcome outcome){
         Company company = companyService.showOneUserCompany(principal.getName());
         if(outcome.getOutcomePrice()<0){
             return "redirect:/outcomes?id="+company.getId()+"&noMinusError";
         }
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
-        Date date = new Date(System.currentTimeMillis());
-        outcome.setCompany(company);
-        outcome.setOutcomeDate(formatter.format(date));
-        outcomeService.save(outcome);
-        int companyNowProfit = company.getProfit();
-        company.setProfit(companyNowProfit-outcome.getOutcomePrice());
-        int companyNowOutcome = company.getOutcome();
-        company.setOutcome(companyNowOutcome+outcome.getOutcomePrice());
-        companyService.save(company);
+        outcomeService.save(outcome, company);
+        companyService.addCompanyOutcome(company, outcome);
         return "redirect:/outcomes?id="+company.getId()+"&outcomeAdded";
     }
     @RequestMapping(value = "/outcomes-by-date", method = RequestMethod.GET)
@@ -123,12 +115,8 @@ public class OutcomesController {
     public String deleteOutcome(Principal principal, Long id){
         Company company = companyService.showOneUserCompany(principal.getName());
         Outcome outcome = outcomeService.getOne(id);
-        int nowOutcome = company.getOutcome();
-        int nowProfit = company.getProfit();
-        company.setOutcome(nowOutcome-outcome.getOutcomePrice());
-        company.setProfit(nowProfit+outcome.getOutcomePrice());
         outcomeService.deleteById(id);
-        companyService.save(company);
+        companyService.companyRemoveOutcome(company, outcome);
         return "redirect:/outcomes?id="+company.getId()+"&outcomeDeleted";
     }
 
@@ -144,7 +132,6 @@ public class OutcomesController {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
         String nowDate = formatter.format(date);
-        User me = userService.findByEmail(principal.getName());
         Company company = companyService.showOneUserCompany(principal.getName());
         int paydayFullSum = 0;
         List<Worker> companyWorkers = workerService.showWorkersByCompanyId(company.getId());
@@ -161,47 +148,12 @@ public class OutcomesController {
         if(company.getIncome()<paydayFullSum){
             return "redirect:/income-page?id="+company.getId()+"&notEnoughCash";
         } else {
-            String nowPayday = company.getPaydayDate();
-            String[] nowPaydayArraySplitted = nowPayday.split("-");
-            String newPayDay = "";
-            int paydayMonthPlusOne = Integer.parseInt(nowPaydayArraySplitted[1])+1;
-            if(Integer.parseInt(nowPaydayArraySplitted[1])<10){
-                newPayDay = nowPaydayArraySplitted[0]+"-0"+String.valueOf(paydayMonthPlusOne)+"-"+nowPaydayArraySplitted[2];
-            }
-            if(paydayMonthPlusOne>12){
-                paydayMonthPlusOne=1;
-                int paydayYearPlusOne = Integer.parseInt(nowPaydayArraySplitted[0])+1;
-                nowPaydayArraySplitted[0] = String.valueOf(paydayYearPlusOne);
-                newPayDay = nowPaydayArraySplitted[0]+"-0"+String.valueOf(paydayMonthPlusOne)+"-"+nowPaydayArraySplitted[2];
-
-            } else {
-                newPayDay = nowPaydayArraySplitted[0]+"-"+String.valueOf(paydayMonthPlusOne)+"-"+nowPaydayArraySplitted[2];
-            }
-            company.setPaydayDate(newPayDay);
-            int nowProfit = company.getProfit();
-            company.setProfit(nowProfit-paydayFullSum);
             for (Worker worker : companyWorkers) {
-                Salary salary = new Salary();
-                salary.setDate(company.getPaydayDate());
-                YearMonth yearMonthObject = YearMonth.of(year, month);
-                int daysInMonth = yearMonthObject.lengthOfMonth();
-                int workerPaycheckPerDay = worker.getSalary()/daysInMonth;
-                salary.setPaycheckPerDay(workerPaycheckPerDay);
-                int workerPaycheckFull = worker.getMonthWorkedDays()*workerPaycheckPerDay;
-                salary.setSalarySum(workerPaycheckFull);
-                salary.setWorkedDays(worker.getMonthWorkedDays());
-                salary.setWorker(worker);
-                worker.setMonthWorkedDays(0);
-                workerService.save(worker);
-                salaryService.save(salary);
+                workerService.updateWorkerMonthWorkedDays(worker, 0);
+                salaryService.save(company, worker, year, month);
             }
-            companyService.save(company);
-            Outcome outcome = new Outcome();
-            outcome.setOutcomePrice(paydayFullSum);
-            outcome.setOutcomeDate(nowDate);
-            outcome.setCompany(company);
-            outcome.setOutcomeDescription("Изплащане на заплати в размер на "+paydayFullSum+" лв.");
-            outcomeService.save(outcome);
+            companyService.companyPaySalaries(company, paydayFullSum);
+            outcomeService.salariesPay(paydayFullSum, company, nowDate);
         }
         return "redirect:/outcomes?id="+company.getId()+"&salaryPayOk";
     }

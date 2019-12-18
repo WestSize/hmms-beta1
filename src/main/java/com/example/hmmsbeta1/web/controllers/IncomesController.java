@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 
 @Controller
 public class IncomesController {
@@ -28,9 +27,6 @@ public class IncomesController {
 
     @RequestMapping(value = "/income-page", method = RequestMethod.GET)
     public String companyIncome(Model model, Principal principal, Long id){
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
-        Date date = new Date(System.currentTimeMillis());
-        String nowDate = formatter.format(date);
         Company company = companyService.getOne(id);
         User me = userService.findByEmail(principal.getName());
         if(!company.getUser().equals(me)){
@@ -45,21 +41,13 @@ public class IncomesController {
     }
 
     @RequestMapping(value = "/income-page", method = RequestMethod.POST)
-    public String insertIncome(Model model, Principal principal, Income income){
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
-        Date date = new Date(System.currentTimeMillis());
+    public String insertIncome(Principal principal, Income income){
         Company company = companyService.showOneUserCompany(principal.getName());
         if(income.getIncomePrice()<0){
             return "redirect:/income-page?id="+company.getId()+"&noMinusError";
         }
-        income.setCompany(company);
-        income.setIncomeDate(formatter.format(date));
-        incomeService.save(income);
-        int nowProfit = company.getProfit();
-        int nowIncome = company.getIncome();
-        company.setIncome(nowIncome+income.getIncomePrice());
-        company.setProfit(nowProfit+income.getIncomePrice());
-        companyService.save(company);
+        incomeService.save(company);
+        companyService.setCompanyIncomeAndProfitPlusOne(company, income);
         return "redirect:/income-page?id="+company.getId();
     }
 
@@ -82,12 +70,8 @@ public class IncomesController {
     public String deleteIncome(Principal principal, Long id){
         Company company = companyService.showOneUserCompany(principal.getName());
         Income income = incomeService.getOne(id);
-        int nowIncome = company.getIncome();
-        int nowProfit = company.getProfit();
-        company.setIncome(nowIncome-income.getIncomePrice());
-        company.setProfit(nowProfit-income.getIncomePrice());
         incomeService.deleteById(id);
-        companyService.save(company);
+        companyService.setCompanyIncomeAndProfitMinus(company, income);
         return "redirect:/income-page?id="+company.getId()+"&incomeDeleted";
     }
 

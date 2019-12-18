@@ -19,12 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Principal;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 
@@ -69,30 +64,11 @@ public class CompaniesController {
 
     @RequestMapping(value = "/company-home", method = RequestMethod.POST)
     public String processCompany(@Valid Company company, Principal principal) {
-        User user = userService.findByEmail(principal.getName());
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
-        Date date = new Date(System.currentTimeMillis());
         if(company.getInvestment()<0){
             return "redirect:/company-home?noMinusError";
         }
-        company.setUser(user);
-        company.setNumberOfOffices(0);
-        company.setNumberOfWorkers(0);
-        company.setPaydayDate(formatter.format(date));
-        company.setProfit((company.getIncome() - company.getInvestment()));
-        company.setCircularLetter("Здравейте! Поканен сте на интервю за работата, която сте кандидатствали" +
-                " във фирмата '" + company.getName() + "'. Моля напишете ни удобен ден и час за среща в наш офис или " +
-                "се свържете с нас на тел: (не е зададен). Поздрави, " + user.getFirstName() + " " + user.getLastName() + " (управител). :)");
-        company.setOutcome(0);
-        user.setWorkingStatus("owner");
-        companyService.save(company);
-        Income income = new Income();
-        income.setCompany(company);
-        income.setIncomeDate(formatter.format(date));
-        income.setIncomeDescription("Първоначално въведена инвестиция, при създаване на фирмата.");
-        int incomeSum = company.getIncome();
-        income.setIncomePrice(incomeSum);
-        incomeService.save(income);
+        companyService.save(company, principal);
+        incomeService.save(company);
         Long companyId = company.getId();
         return "redirect:/company-page?id="+companyId;
     }
@@ -145,36 +121,19 @@ public class CompaniesController {
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public String upload(Model model, @RequestParam("files") MultipartFile[] files, Company company, Principal principal, Application application) throws IOException {
-        StringBuilder fileNames = new StringBuilder();
-        for (MultipartFile file : files) {
-            Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
-            fileNames.append(file.getOriginalFilename());
-            Files.write(fileNameAndPath, file.getBytes());
-        }
-        application.setApproved(false);
-        application.setInvited(false);
-        application.setCompanyId(companyId);
-        application.setCvPath(fileNames + "");
-        User user = userService.findByEmail(principal.getName());
-        application.setUser(user);
-        applicationService.save(application);
+    public String upload(@RequestParam("files") MultipartFile[] files, Company company, Principal principal, Application application) throws IOException {
+        applicationService.save(files, company, principal, application);
         return "redirect:/company-list?uploadok";
     }
 
     @RequestMapping(value = "/company-page", method = RequestMethod.POST)
-    public String updateUserCompany(Model model, Company company, Principal principal) {
+    public String updateUserCompany(Company company) {
         Company oldCompany = companyService.getOne(companyId);
-        companyId = null;
-        oldCompany.setName(company.getName());
-        oldCompany.setDescription(company.getDescription());
-        oldCompany.setPhoneNumber(company.getPhoneNumber());
-        oldCompany.setPaydayDate(company.getPaydayDate());
         if (company.getInvestment()<0){
             return "redirect:/company-home?noMinusError";
         }
-        oldCompany.setInvestment(company.getInvestment());
-        companyService.save(oldCompany);
+        companyService.update(company, companyId);
+        companyId=null;
         return "redirect:/company-page?id=" + oldCompany.getId();
     }
 
