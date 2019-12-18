@@ -3,11 +3,10 @@ package com.example.hmmsbeta1.web.controllers;
 import com.example.hmmsbeta1.web.entities.*;
 import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
 import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
-import com.example.hmmsbeta1.web.repositories.MessagesRepositories.MessageRepository;
-import com.example.hmmsbeta1.web.repositories.MessagesRepositories.PrivateConversationRepository;
 import com.example.hmmsbeta1.web.repositories.UserRepository;
-import com.example.hmmsbeta1.web.services.PrivateMessagesService;
-import org.jasypt.util.text.BasicTextEncryptor;
+import com.example.hmmsbeta1.web.services.MessageServices.MessageService;
+import com.example.hmmsbeta1.web.services.PrivateConversationServices.PrivateConversationService;
+import com.example.hmmsbeta1.web.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,37 +22,28 @@ import java.util.List;
 public class MessagesController {
 
     @Autowired
-    private PrivateMessagesService privateMessagesService;
-
+    private PrivateConversationService privateConversationService;
     @Autowired
-    private PrivateConversationRepository privateConversationRepository;
-
+    private MessageService messageService;
     @Autowired
-    private MessageRepository messageRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
+    private UserService userService;
     @Autowired
     private ApplicationRepository applicationRepository;
-
     @Autowired
     private CompanyRepository companyRepository;
-
-    BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
 
     private Long replyId = null;
 
     @RequestMapping(value = "/messages", method = RequestMethod.GET)
     public String messages(Model model, Principal principal) {
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        if(privateConversationRepository.findAll().size()>0){
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        if(privateConversationService.findAll().size()>0){
             String userEmail = principal.getName();
-            if(messageRepository.showOnlyUsersMessages(userEmail).size()>0) {
-                model.addAttribute("messages", messageRepository.showOnlyUsersMessages(userEmail));
-                model.addAttribute("textmsgs", messageRepository.findAll());
+            if(messageService.showOnlyUsersMessages(userEmail).size()>0) {
+                model.addAttribute("messages", messageService.showOnlyUsersMessages(userEmail));
+                model.addAttribute("textmsgs", messageService.findAll());
 //                model.addAttribute("seen", privateConversationRepository.findAllUsersConversationByEmail(principal.getName()));
-                model.addAttribute("seen", privateConversationRepository.findAll());
+                model.addAttribute("seen", privateConversationService.findAll());
                 return "messages";
             } else {
                 //User user = userRepository.findByEmail(principal.getName());
@@ -67,14 +57,14 @@ public class MessagesController {
 
     @RequestMapping(value = "/new-message", method = RequestMethod.GET)
     public String showNewMessage(Model model, Principal principal){
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
         model.addAttribute("newmsg", new PrivateConversation());
         return "/new-message";
     }
 
     @RequestMapping(value="/new-message", method=RequestMethod.POST)
     public String processMessage(@Valid PrivateConversation privateConversation, Message message, Principal principal) {
-        if(userRepository.findByEmail(message.getUserRecipient())==null){
+        if(userService.findByEmail(message.getUserRecipient())==null){
             return "redirect:/new-message?noSuchUser";
         } else if (message.getUserRecipient().equals(principal.getName())){
             return "redirect:/new-message?noSelfPms";
@@ -82,45 +72,41 @@ public class MessagesController {
             privateConversation.setUserSender(principal.getName());
             privateConversation.setIsRecipientSeen(0);
             //ot tuka pokazva neprochetenite suobshteni
-            userRepository.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userRepository.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages()+1);
-//            int userUnreadedMessages=userRepository.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages();
-//            userRepository.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userUnreadedMessages+1);
+            userService.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages()+1);
             privateConversation.setIsSenderSeen(1);
-            privateMessagesService.saveMessage(privateConversation);
+            privateConversationService.saveMessage(privateConversation);
             message.setPrivateConversation(privateConversation);
             message.setUserSender(principal.getName());
-//            message.setMessage(passwordEncoder.encode(message.getMessage()));
-            messageRepository.save(message);
+            messageService.save(message);
             return "redirect:/new-message?success";
         }
     }
 
     @RequestMapping(value = "/read-message", method = RequestMethod.GET)
-//    @ResponseBody()
     public String readMessage(long id, Model model, Principal principal){
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        if(!principal.getName().equals(privateConversationRepository.getOne(id).getUserSender()) &&
-                !principal.getName().equals(privateConversationRepository.getOne(id).getUserRecipient())){
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        if(!principal.getName().equals(privateConversationService.getOne(id).getUserSender()) &&
+                !principal.getName().equals(privateConversationService.getOne(id).getUserRecipient())){
             return "redirect:/messages?noSuchMsg";
         } else {
-            PrivateConversation privateConversation = privateConversationRepository.getOne(id);
+            PrivateConversation privateConversation = privateConversationService.getOne(id);
             if(principal.getName().equals(privateConversation.getUserSender())){
                 privateConversation.setIsSenderSeen(1);
-                int userUnreadedMessages=userRepository.findByEmail(principal.getName()).getUnreadedMessages();
+                int userUnreadedMessages=userService.findByEmail(principal.getName()).getUnreadedMessages();
                 if(userUnreadedMessages!=0) {
-                    userRepository.findByEmail(principal.getName()).setUnreadedMessages(userUnreadedMessages-=1);
+                    userService.findByEmail(principal.getName()).setUnreadedMessages(userUnreadedMessages-=1);
                 }
-                privateMessagesService.saveMessage(privateConversation);
+                privateConversationService.saveMessage(privateConversation);
             } else if (principal.getName().equals(privateConversation.getUserRecipient())){
                 privateConversation.setIsRecipientSeen(1);
-                int userUnreadedMessages=userRepository.findByEmail(principal.getName()).getUnreadedMessages();
+                int userUnreadedMessages=userService.findByEmail(principal.getName()).getUnreadedMessages();
                 if(userUnreadedMessages!=0) {
-                    userRepository.findByEmail(principal.getName()).setUnreadedMessages(userUnreadedMessages -= 1);
+                    userService.findByEmail(principal.getName()).setUnreadedMessages(userUnreadedMessages -= 1);
                 }
-                privateMessagesService.saveMessage(privateConversation);
+                privateConversationService.saveMessage(privateConversation);
             }
-            model.addAttribute("readConversation", privateConversationRepository.getOne(id));
-            model.addAttribute("readMessages", messageRepository.findAllByPrivateConversationId(id));
+            model.addAttribute("readConversation", privateConversationService.getOne(id));
+            model.addAttribute("readMessages", messageService.findAllByPrivateConversationId(id));
             model.addAttribute("replymsg", new Message());
             replyId = id;
             return "read-message";
@@ -129,7 +115,7 @@ public class MessagesController {
 
     @RequestMapping(value = "/read-message", method = RequestMethod.POST)
     private String replyMessage(Message message, Principal principal){
-        PrivateConversation privateConversation = privateConversationRepository.getOne(replyId);
+        PrivateConversation privateConversation = privateConversationService.getOne(replyId);
         replyId = null;
         privateConversation.setDateAndTime(message.getDateAndTime());
         message.setPrivateConversation(privateConversation);
@@ -144,35 +130,35 @@ public class MessagesController {
         }
         privateConversation.setIsSenderSeen(1);
         privateConversation.setIsRecipientSeen(0);
-        userRepository.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userRepository.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages()+1);
-        int userUnreadedMessages=userRepository.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages();
-        messageRepository.save(message);
+        userService.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages()+1);
+        int userUnreadedMessages=userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages();
+        messageService.save(message);
         int conversationId = Math.toIntExact(message.getPrivateConversation().getId());
         return "redirect:/read-message?id="+conversationId;
     }
 
     @RequestMapping(value = "/delete-conversation")
     public String deleteConversation(long id){
-        User sender = userRepository.findByEmail(privateConversationRepository.getOne(id).getUserSender());
-        User recipient = userRepository.findByEmail(privateConversationRepository.getOne(id).getUserRecipient());
+        User sender = userService.findByEmail(privateConversationService.getOne(id).getUserSender());
+        User recipient = userService.findByEmail(privateConversationService.getOne(id).getUserRecipient());
         if(sender.getUnreadedMessages()!=0) {
             sender.setUnreadedMessages(sender.getUnreadedMessages()-1);
-            userRepository.save(sender);
+            userService.update(sender);
         }
         if(recipient.getUnreadedMessages()!=0){
             recipient.setUnreadedMessages(recipient.getUnreadedMessages()-1);
-            userRepository.save(recipient);
+            userService.update(recipient);
         }
 
-        privateConversationRepository.deleteById(id);
+        privateConversationService.deleteById(id);
         return "redirect:/messages";
     }
 
     @RequestMapping(value = "/delete-message")
     public String deleteMessage(long id){
-        Message message = messageRepository.getOne(id);
+        Message message = messageService.getOne(id);
         int conversationId = Math.toIntExact(message.getPrivateConversation().getId());
-        messageRepository.deleteById(id);
+        messageService.deleteById(id);
         return "redirect:/read-message?id="+conversationId;
     }
 
@@ -183,20 +169,20 @@ public class MessagesController {
         PrivateConversation privateConversation = new PrivateConversation();
         privateConversation.setDateAndTime(formatter.format(date));
         privateConversation.setUserSender(principal.getName());
-        privateConversation.setUserRecipient(userRepository.getOne(id).getEmail());
+        privateConversation.setUserRecipient(userService.getOne(id).getEmail());
         privateConversation.setMessageSubject("Покана за интервю за работа.");
         privateConversation.setIsRecipientSeen(0);
         //ot tuka pokazva neprochetenite suobshteni
-        userRepository.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userRepository.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages() + 1);
+        userService.findByEmail(privateConversation.getUserRecipient()).setUnreadedMessages(userService.findByEmail(privateConversation.getUserRecipient()).getUnreadedMessages() + 1);
         privateConversation.setIsSenderSeen(1);
-        privateMessagesService.saveMessage(privateConversation);
+        privateConversationService.saveMessage(privateConversation);
         Message message = new Message();
         message.setPrivateConversation(privateConversation);
         message.setUserSender(principal.getName());
-        message.setUserRecipient(userRepository.getOne(id).getEmail());
+        message.setUserRecipient(userService.getOne(id).getEmail());
         message.setMessageText(companyRepository.showOneUserCompany(principal.getName()).getCircularLetter());
         message.setDateAndTime(formatter.format(date));
-        messageRepository.save(message);
+        messageService.save(message);
         List <Application> applications = applicationRepository.showApplicationByCandidateId(id);
         Application application = new Application();
         for (int i = 0; i < applications.size(); i++) {

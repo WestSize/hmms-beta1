@@ -11,4 +11,8 @@ public interface UserService extends UserDetailsService {
 
     User save(UserRegistrationDto registration);
 
+    void update(User user);
+
+    User getOne(Long id);
+
 }

@@ -1,13 +1,13 @@
 package com.example.hmmsbeta1.web.controllers;
 
 import com.example.hmmsbeta1.web.entities.*;
-import com.example.hmmsbeta1.web.repositories.ApplicationRepositories.ApplicationRepository;
-import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
-import com.example.hmmsbeta1.web.repositories.IncomeRepositories.IncomeRepository;
-import com.example.hmmsbeta1.web.repositories.SalaryRepositories.SalaryRepository;
-import com.example.hmmsbeta1.web.repositories.WorkScheduleRepositories.WorkScheduleRepository;
-import com.example.hmmsbeta1.web.repositories.WorkerRepositories.WorkerRepository;
-import com.example.hmmsbeta1.web.repositories.UserRepository;
+import com.example.hmmsbeta1.web.services.ApplicationServices.ApplicationService;
+import com.example.hmmsbeta1.web.services.CompanyServices.CompanyService;
+import com.example.hmmsbeta1.web.services.IncomeServices.IncomeService;
+import com.example.hmmsbeta1.web.services.SalaryServices.SalaryService;
+import com.example.hmmsbeta1.web.services.UserService;
+import com.example.hmmsbeta1.web.services.WorkScheduleServices.WorkScheduleService;
+import com.example.hmmsbeta1.web.services.WorkerServices.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,51 +32,44 @@ import java.util.List;
 public class CompaniesController {
 
     @Autowired
-    private UserRepository userRepository;
-
+    private UserService userService;
     @Autowired
-    private CompanyRepository companyRepository;
-
+    private CompanyService companyService;
     @Autowired
-    private ApplicationRepository applicationRepository;
-
+    private ApplicationService applicationService;
     @Autowired
-    private WorkerRepository workerRepository;
-
+    private WorkerService workerService;
     @Autowired
-    private WorkScheduleRepository workScheduleRepository;
-
+    private WorkScheduleService workScheduleService;
     @Autowired
-    private IncomeRepository incomeRepository;
+    private IncomeService incomeService;
 
-    @Autowired
-    private SalaryRepository salaryRepository;
 
+    private SalaryService salaryService;
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
-
     private Long companyId = null;
 
     @RequestMapping(value = "/company-home", method = RequestMethod.GET)
     public ModelAndView companyHome(Model model, Principal principal) {
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
         model.addAttribute("newcompany", new Company());
-        model.addAttribute("usercompanies", companyRepository.showOnlyUsersCompanies(principal.getName()));
-        User me = userRepository.findByEmail(principal.getName());
+        model.addAttribute("usercompanies", companyService.showOnlyUsersCompanies(principal.getName()));
+        User me = userService.findByEmail(principal.getName());
         model.addAttribute("userInfo", me);
         if (me.getWorkingStatus().equals("worker")) {
-            model.addAttribute("workerInfo", workerRepository.showWorkerByUserId(me.getId()));
-            model.addAttribute("myWorkSchedulesCounter", workScheduleRepository.showLast12WorkSchedulesByUserId(me.getId()).size());
-            model.addAttribute("myWorkSchedule", workScheduleRepository.showLast12WorkSchedulesByUserId(me.getId()));
-            Worker worker = workerRepository.showWorkerByUserId(me.getId());
-            model.addAttribute("salariesCounter", salaryRepository.showLast12WorkerSalariesByWorkerId(worker.getId()).size());
-            model.addAttribute("lastSalaries", salaryRepository.showLast12WorkerSalariesByWorkerId(worker.getId()));
+            model.addAttribute("workerInfo", workerService.showWorkerByUserId(me.getId()));
+            model.addAttribute("myWorkSchedulesCounter", workScheduleService.showLast12WorkSchedulesByUserId(me.getId()).size());
+            model.addAttribute("myWorkSchedule", workScheduleService.showLast12WorkSchedulesByUserId(me.getId()));
+            Worker worker = workerService.showWorkerByUserId(me.getId());
+            model.addAttribute("salariesCounter", salaryService.showLast12WorkerSalariesByWorkerId(worker.getId()).size());
+            model.addAttribute("lastSalaries", salaryService.showLast12WorkerSalariesByWorkerId(worker.getId()));
         }
         return new ModelAndView("company-home");
     }
 
     @RequestMapping(value = "/company-home", method = RequestMethod.POST)
     public String processCompany(@Valid Company company, Principal principal) {
-        User user = userRepository.findByEmail(principal.getName());
+        User user = userService.findByEmail(principal.getName());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
         if(company.getInvestment()<0){
@@ -92,39 +85,39 @@ public class CompaniesController {
                 "се свържете с нас на тел: (не е зададен). Поздрави, " + user.getFirstName() + " " + user.getLastName() + " (управител). :)");
         company.setOutcome(0);
         user.setWorkingStatus("owner");
-        companyRepository.save(company);
+        companyService.save(company);
         Income income = new Income();
         income.setCompany(company);
         income.setIncomeDate(formatter.format(date));
         income.setIncomeDescription("Първоначално въведена инвестиция, при създаване на фирмата.");
         int incomeSum = company.getIncome();
         income.setIncomePrice(incomeSum);
-        incomeRepository.save(income);
+        incomeService.save(income);
         Long companyId = company.getId();
         return "redirect:/company-page?id="+companyId;
     }
 
     @RequestMapping(value = "/company-page", method = RequestMethod.GET)
     public String companyDetails(long id, Model model, Principal principal) {
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        Long ownerId = userRepository.findByEmail(principal.getName()).getId();
-        Company company = companyRepository.getOne(id);
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        Long ownerId = userService.findByEmail(principal.getName()).getId();
+        Company company = companyService.getOne(id);
         if (company.getUser().getId() == ownerId) {
-            model.addAttribute("companyInfo", companyRepository.getOne(id));
-            model.addAttribute("companyOwnerId", companyRepository.getOne(id).getUser().getId());
+            model.addAttribute("companyInfo", companyService.getOne(id));
+            model.addAttribute("companyOwnerId", companyService.getOne(id).getUser().getId());
             model.addAttribute("updateCompany", new Company());
             companyId = id;
             return "/company-page";
-        } else if (userRepository.findByEmail(principal.getName()).getWorkingStatus().equals("owner")) {
-            model.addAttribute("companyInfo", companyRepository.getOne(id));
+        } else if (userService.findByEmail(principal.getName()).getWorkingStatus().equals("owner")) {
+            model.addAttribute("companyInfo", companyService.getOne(id));
             return "/company-details-no-application";
-        } else if (userRepository.findByEmail(principal.getName()).getWorkingStatus().equals("worker")) {
-            model.addAttribute("companyInfo", companyRepository.getOne(id));
+        } else if (userService.findByEmail(principal.getName()).getWorkingStatus().equals("worker")) {
+            model.addAttribute("companyInfo", companyService.getOne(id));
             return "/company-details-no-application";
         } else {
-            User user = userRepository.findByEmail(principal.getName());
+            User user = userService.findByEmail(principal.getName());
             Application application = null;
-            List<Application> allApps = applicationRepository.findAll();
+            List<Application> allApps = applicationService.findAll();
             for (int i = 0; i < allApps.size(); i++) {
                 Application nowApp = allApps.get(i);
                 Long compId = nowApp.getCompanyId();
@@ -135,16 +128,16 @@ public class CompaniesController {
             }
             if (application != null) {
                 if (application.getCompanyId().equals(company.getId()) && application.getUser().getId().equals(user.getId())) {
-                    model.addAttribute("companyInfo", companyRepository.getOne(id));
+                    model.addAttribute("companyInfo", companyService.getOne(id));
                     companyId = id;
                     return "/company-details-no-application";
                 } else {
-                    model.addAttribute("companyInfo", companyRepository.getOne(id));
+                    model.addAttribute("companyInfo", companyService.getOne(id));
                     companyId = id;
                     return "/company-details";
                 }
             } else {
-                model.addAttribute("companyInfo", companyRepository.getOne(id));
+                model.addAttribute("companyInfo", companyService.getOne(id));
                 companyId = id;
                 return "/company-details";
             }
@@ -163,15 +156,15 @@ public class CompaniesController {
         application.setInvited(false);
         application.setCompanyId(companyId);
         application.setCvPath(fileNames + "");
-        User user = userRepository.findByEmail(principal.getName());
+        User user = userService.findByEmail(principal.getName());
         application.setUser(user);
-        applicationRepository.save(application);
+        applicationService.save(application);
         return "redirect:/company-list?uploadok";
     }
 
     @RequestMapping(value = "/company-page", method = RequestMethod.POST)
     public String updateUserCompany(Model model, Company company, Principal principal) {
-        Company oldCompany = companyRepository.getOne(companyId);
+        Company oldCompany = companyService.getOne(companyId);
         companyId = null;
         oldCompany.setName(company.getName());
         oldCompany.setDescription(company.getDescription());
@@ -181,14 +174,14 @@ public class CompaniesController {
             return "redirect:/company-home?noMinusError";
         }
         oldCompany.setInvestment(company.getInvestment());
-        companyRepository.save(oldCompany);
+        companyService.save(oldCompany);
         return "redirect:/company-page?id=" + oldCompany.getId();
     }
 
     @RequestMapping(value = "/company-list", method = RequestMethod.GET)
     public String companyList(Model model, Principal principal) {
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        model.addAttribute("allcompanies", companyRepository.findAll());
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("allcompanies", companyService.findAll());
         return "/company-list";
     }
 }

@@ -4,10 +4,9 @@ package com.example.hmmsbeta1.web.controllers;
 import com.example.hmmsbeta1.web.entities.Company;
 import com.example.hmmsbeta1.web.entities.User;
 import com.example.hmmsbeta1.web.entities.Worker;
-import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
-import com.example.hmmsbeta1.web.repositories.UserRepository;
-import com.example.hmmsbeta1.web.repositories.WorkerRepositories.WorkerRepository;
+import com.example.hmmsbeta1.web.services.CompanyServices.CompanyService;
 import com.example.hmmsbeta1.web.services.UserService;
+import com.example.hmmsbeta1.web.services.WorkerServices.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,16 +36,11 @@ public class MainController {
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
-
     @Autowired
-    private CompanyRepository companyRepository;
-
+    private CompanyService companyService;
     @Autowired
-    private WorkerRepository workerRepository;
+    private WorkerService workerService;
 
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads/avatars";
 
@@ -54,7 +48,7 @@ public class MainController {
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView home(Model model, Principal principal) {
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
 //        int userUnreededMsgs = userService.countUnreededMessages(principal.getName());
         model.addAttribute("updateuser", new User());
         //        ot tuka pochva reloada na principalite
@@ -82,7 +76,7 @@ public class MainController {
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
     public String updateUser(Principal principal, User newUserInfo) {
-        User oldUserInfo = userRepository.findByEmail(principal.getName());
+        User oldUserInfo = userService.findByEmail(principal.getName());
         oldUserInfo.setFirstName(newUserInfo.getFirstName());
         oldUserInfo.setLastName(newUserInfo.getLastName());
         oldUserInfo.setEmail(newUserInfo.getEmail());
@@ -92,7 +86,7 @@ public class MainController {
         oldUserInfo.setAge(newUserInfo.getAge());
         oldUserInfo.setFacebookPage(newUserInfo.getFacebookPage());
         oldUserInfo.setDescription(newUserInfo.getDescription());
-        userRepository.save(oldUserInfo);
+        userService.update(oldUserInfo);
         return "redirect:/?updateok";
     }
 
@@ -100,16 +94,16 @@ public class MainController {
     public String uploadAvatar(@RequestParam("avatarPath") String avatarPath, Principal principal) throws IOException {
         User user = userService.findByEmail(principal.getName());
         user.setAvatarPath(avatarPath);
-        userRepository.save(user);
+        userService.update(user);
         return "redirect:/";
     }
 
     @RequestMapping(value = "/user-page", method = RequestMethod.GET)
     public String viewUserPage(Long id, Model model, Principal principal) {
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        User user = userRepository.getOne(id);
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        User user = userService.getOne(id);
         Worker worker = null; //worker
-        List<Worker> allWorkers = workerRepository.findAll();
+        List<Worker> allWorkers = workerService.findAll();
         for (int i = 0; i < allWorkers.size(); i++) {
             Worker nowWorker = allWorkers.get(i);
             if (nowWorker.getUser() == user) {
@@ -117,27 +111,27 @@ public class MainController {
             }
         }
         if (worker != null) {
-            User me = userRepository.findByEmail(principal.getName());
+            User me = userService.findByEmail(principal.getName());
             Company userCompany = worker.getCompany();
-            if (me.getWorkingStatus().equals("owner") && userCompany.equals(companyRepository.showOneUserCompany(principal.getName()))) {
-                model.addAttribute("userinfo", userRepository.getOne(id));
+            if (me.getWorkingStatus().equals("owner") && userCompany.equals(companyService.showOneUserCompany(principal.getName()))) {
+                model.addAttribute("userinfo", userService.getOne(id));
                 model.addAttribute("companyDetails", userCompany);
                 model.addAttribute("workerDetails", worker);
                 workerUserId = worker.getUser().getId();
                 return "/user-page-owner";
             } else {
-                model.addAttribute("userinfo", userRepository.getOne(id));
+                model.addAttribute("userinfo", userService.getOne(id));
                 model.addAttribute("companyDetails", userCompany);
                 return "/user-page";
             }
         } else {
             if(user.getWorkingStatus().equals("owner")){
-                Company userCompany = companyRepository.showOneUserCompany(user.getEmail());
-                model.addAttribute("userinfo", userRepository.getOne(id));
+                Company userCompany = companyService.showOneUserCompany(user.getEmail());
+                model.addAttribute("userinfo", userService.getOne(id));
                 model.addAttribute("companyDetails", userCompany);
                 return "/user-page";
             } else {
-                model.addAttribute("userinfo", userRepository.getOne(id));
+                model.addAttribute("userinfo", userService.getOne(id));
                 return "/user-page";
             }
         }
@@ -145,22 +139,22 @@ public class MainController {
     @RequestMapping(value = "/user-page", method = RequestMethod.POST)
     public String editWorkerData(Worker worker){
         Long nowId = workerUserId;
-        Worker workerOld = workerRepository.showWorkerByUserId(workerUserId);
+        Worker workerOld = workerService.showWorkerByUserId(workerUserId);
         workerUserId = null;
         workerOld.setPosition(worker.getPosition());
         workerOld.setSalary(worker.getSalary());
-        workerRepository.save(workerOld);
+        workerService.save(workerOld);
         return "redirect:/user-page?id="+nowId+"&workerUpdated";
     }
 
     @RequestMapping(value = "/add-dayoff", method = RequestMethod.POST)
     public String addDayOff(Principal principal, Worker workerNew){
-        Worker worker = workerRepository.showWorkerByUserId(workerUserId);
+        Worker worker = workerService.showWorkerByUserId(workerUserId);
         Long nowId = workerUserId;
         workerUserId = null;
         int nowWorkedDays = worker.getMonthWorkedDays();
         worker.setMonthWorkedDays(nowWorkedDays+workerNew.getMonthWorkedDays());
-        workerRepository.save(worker);
+        workerService.save(worker);
         return "redirect:/user-page?id="+nowId+"&workerDayoffAdded";
     }
 }

@@ -18,4 +18,5 @@ public class PrivateConversationCustomRepositoryImpl implements PrivateConversat
         query.setParameter(2, email);
         return query.getResultList();
     }
+
 }

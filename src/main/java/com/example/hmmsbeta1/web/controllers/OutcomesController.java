@@ -1,11 +1,11 @@
 package com.example.hmmsbeta1.web.controllers;
 
 import com.example.hmmsbeta1.web.entities.*;
-import com.example.hmmsbeta1.web.repositories.CompanyRepositories.CompanyRepository;
-import com.example.hmmsbeta1.web.repositories.OutcomeRepositories.OutcomeRepository;
-import com.example.hmmsbeta1.web.repositories.SalaryRepositories.SalaryRepository;
-import com.example.hmmsbeta1.web.repositories.UserRepository;
-import com.example.hmmsbeta1.web.repositories.WorkerRepositories.WorkerRepository;
+import com.example.hmmsbeta1.web.services.CompanyServices.CompanyService;
+import com.example.hmmsbeta1.web.services.OutcomeServices.OutcomeService;
+import com.example.hmmsbeta1.web.services.SalaryServices.SalaryService;
+import com.example.hmmsbeta1.web.services.UserService;
+import com.example.hmmsbeta1.web.services.WorkerServices.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,33 +22,29 @@ import java.util.List;
 @Controller
 public class OutcomesController {
     @Autowired
-    private UserRepository userRepository;
-
+    private UserService userService;
     @Autowired
-    private CompanyRepository companyRepository;
-
+    private CompanyService companyService;
     @Autowired
-    private WorkerRepository workerRepository;
-
+    private WorkerService workerService;
     @Autowired
-    private OutcomeRepository outcomeRepository;
-
+    private OutcomeService outcomeService;
     @Autowired
-    private SalaryRepository salaryRepository;
+    private SalaryService salaryService;
 
     @RequestMapping(value = "/outcomes", method = RequestMethod.GET)
     public String getOutcomesPage(Principal principal, Model model, Long id){
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        User me = userRepository.findByEmail(principal.getName());
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        User me = userService.findByEmail(principal.getName());
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
         String nowDate = formatter.format(date);
-        Company company = companyRepository.showOneUserCompany(principal.getName());
+        Company company = companyService.showOneUserCompany(principal.getName());
         if(!company.getUser().equals(me)){
             return "redirect:/company-home?notYourCompany";
         }
-        model.addAttribute("outcomesCounter", outcomeRepository.findAllOutcomesByCompanyId(id).size());
-        model.addAttribute("CompanyOutcomes", outcomeRepository.findLast12OutcomesByCompanyId(id));
+        model.addAttribute("outcomesCounter", outcomeService.findAllOutcomesByCompanyId(id).size());
+        model.addAttribute("CompanyOutcomes", outcomeService.findLast12OutcomesByCompanyId(id));
         model.addAttribute("fullOutcomeCash", company.getOutcome());
         String[] payDayDateSplittedArray = company.getPaydayDate().split("-");
         String payDayDateSplittedString = null;
@@ -73,7 +69,7 @@ public class OutcomesController {
         if(nowDateInt>=payDayDate) {
             model.addAttribute("paydayDate", company.getPaydayDate());
             int paydayFullSum = 0;
-            List<Worker> companyWorkers = workerRepository.showWorkersByCompanyId(company.getId());
+            List<Worker> companyWorkers = workerService.showWorkersByCompanyId(company.getId());
             String[] nowYearAndMonth = nowDate.split("-");
             int year = Integer.parseInt(nowYearAndMonth[0]);
             int month = Integer.parseInt(nowYearAndMonth[1]);
@@ -93,7 +89,7 @@ public class OutcomesController {
 
     @RequestMapping(value = "/outcomes", method = RequestMethod.POST)
     public String addOutCome(Principal principal, Model model, Outcome outcome){
-        Company company = companyRepository.showOneUserCompany(principal.getName());
+        Company company = companyService.showOneUserCompany(principal.getName());
         if(outcome.getOutcomePrice()<0){
             return "redirect:/outcomes?id="+company.getId()+"&noMinusError";
         }
@@ -101,45 +97,45 @@ public class OutcomesController {
         Date date = new Date(System.currentTimeMillis());
         outcome.setCompany(company);
         outcome.setOutcomeDate(formatter.format(date));
-        outcomeRepository.save(outcome);
+        outcomeService.save(outcome);
         int companyNowProfit = company.getProfit();
         company.setProfit(companyNowProfit-outcome.getOutcomePrice());
         int companyNowOutcome = company.getOutcome();
         company.setOutcome(companyNowOutcome+outcome.getOutcomePrice());
-        companyRepository.save(company);
+        companyService.save(company);
         return "redirect:/outcomes?id="+company.getId()+"&outcomeAdded";
     }
     @RequestMapping(value = "/outcomes-by-date", method = RequestMethod.GET)
     public String findOutcomesByDate(Principal principal, Model model, @RequestParam("outcomeDay") String outcomeDay){
-        User me = userRepository.findByEmail(principal.getName());
+        User me = userService.findByEmail(principal.getName());
         if (!me.getWorkingStatus().equals("owner")){
             return "redirect:/company-home?notOwner";
         }
-        Company company = companyRepository.showOneUserCompany(principal.getName());
-        model.addAttribute("userPMs", userRepository.findByEmail(principal.getName()).getUnreadedMessages());
-        model.addAttribute("outcomesCounter", outcomeRepository.findOutcomesByCompanyIdAndDate(company.getId(), outcomeDay).size());
-        model.addAttribute("outcomesList", outcomeRepository.findOutcomesByCompanyIdAndDate(company.getId(), outcomeDay));
+        Company company = companyService.showOneUserCompany(principal.getName());
+        model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("outcomesCounter", outcomeService.findOutcomesByCompanyIdAndDate(company.getId(), outcomeDay).size());
+        model.addAttribute("outcomesList", outcomeService.findOutcomesByCompanyIdAndDate(company.getId(), outcomeDay));
         model.addAttribute("outcomeDay", outcomeDay);
         return "outcomes-by-date";
     }
 
     @RequestMapping("/deleteoutcome")
     public String deleteOutcome(Principal principal, Long id){
-        Company company = companyRepository.showOneUserCompany(principal.getName());
-        Outcome outcome = outcomeRepository.getOne(id);
+        Company company = companyService.showOneUserCompany(principal.getName());
+        Outcome outcome = outcomeService.getOne(id);
         int nowOutcome = company.getOutcome();
         int nowProfit = company.getProfit();
         company.setOutcome(nowOutcome-outcome.getOutcomePrice());
         company.setProfit(nowProfit+outcome.getOutcomePrice());
-        outcomeRepository.deleteById(id);
-        companyRepository.save(company);
+        outcomeService.deleteById(id);
+        companyService.save(company);
         return "redirect:/outcomes?id="+company.getId()+"&outcomeDeleted";
     }
 
     @RequestMapping("/hideoutcome")
     public String hideOutcome(Principal principal, Long id){
-        Company company = companyRepository.showOneUserCompany(principal.getName());
-        outcomeRepository.deleteById(id);
+        Company company = companyService.showOneUserCompany(principal.getName());
+        outcomeService.deleteById(id);
         return "redirect:/outcomes?id="+company.getId()+"&outcomeHided";
     }
 
@@ -148,10 +144,10 @@ public class OutcomesController {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
         Date date = new Date(System.currentTimeMillis());
         String nowDate = formatter.format(date);
-        User me = userRepository.findByEmail(principal.getName());
-        Company company = companyRepository.showOneUserCompany(principal.getName());
+        User me = userService.findByEmail(principal.getName());
+        Company company = companyService.showOneUserCompany(principal.getName());
         int paydayFullSum = 0;
-        List<Worker> companyWorkers = workerRepository.showWorkersByCompanyId(company.getId());
+        List<Worker> companyWorkers = workerService.showWorkersByCompanyId(company.getId());
         String[] nowYearAndMonth = nowDate.split("-");
         int year = Integer.parseInt(nowYearAndMonth[0]);
         int month = Integer.parseInt(nowYearAndMonth[1]);
@@ -196,16 +192,16 @@ public class OutcomesController {
                 salary.setWorkedDays(worker.getMonthWorkedDays());
                 salary.setWorker(worker);
                 worker.setMonthWorkedDays(0);
-                workerRepository.save(worker);
-                salaryRepository.save(salary);
+                workerService.save(worker);
+                salaryService.save(salary);
             }
-            companyRepository.save(company);
+            companyService.save(company);
             Outcome outcome = new Outcome();
             outcome.setOutcomePrice(paydayFullSum);
             outcome.setOutcomeDate(nowDate);
             outcome.setCompany(company);
             outcome.setOutcomeDescription("Изплащане на заплати в размер на "+paydayFullSum+" лв.");
-            outcomeRepository.save(outcome);
+            outcomeService.save(outcome);
         }
         return "redirect:/outcomes?id="+company.getId()+"&salaryPayOk";
     }
