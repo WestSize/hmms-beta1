@@ -17,7 +17,7 @@ public interface ApplicationService {
     Application showApplicationByCompanyId(Long id);
     Application showOneApplicationByUserIdAndCompanyId(Long UserId, Long CompanyID);
 //    void save(Application application);
-    void save(MultipartFile[] files, Company company, Principal principal, Application application) throws IOException;
+    void save(MultipartFile[] files, Company company, Principal principal, Application application, String uploadDirectory, Long companyId) throws IOException;
     Application getOne(Long id);
     List<Application> findAll();
     void deleteById(Long id);

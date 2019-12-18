@@ -78,6 +78,7 @@ public class CompaniesController {
         model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
         Long ownerId = userService.findByEmail(principal.getName()).getId();
         Company company = companyService.getOne(id);
+        companyId = id;
         if (company.getUser().getId() == ownerId) {
             model.addAttribute("companyInfo", companyService.getOne(id));
             model.addAttribute("companyOwnerId", companyService.getOne(id).getUser().getId());
@@ -122,7 +123,7 @@ public class CompaniesController {
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public String upload(@RequestParam("files") MultipartFile[] files, Company company, Principal principal, Application application) throws IOException {
-        applicationService.save(files, company, principal, application);
+        applicationService.save(files, company, principal, application, uploadDirectory, companyId);
         return "redirect:/company-list?uploadok";
     }
 

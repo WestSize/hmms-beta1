@@ -28,9 +28,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Autowired
     private CompanyService companyService;
 
-    public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
+//    private static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
 
-    private Long companyId = null;
+//    private Long companyId = null;
 
     @Override
     public List showOnlyUsersCompanyApplications(Long id) {
@@ -73,7 +73,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 //        applicationRepository.save(application);
 //    }
     @Override
-    public void save(MultipartFile[] files, Company company, Principal principal, Application application) throws IOException {
+    public void save(MultipartFile[] files, Company company, Principal principal, Application application, String uploadDirectory, Long companyId) throws IOException {
         StringBuilder fileNames = new StringBuilder();
         for (MultipartFile file : files) {
             Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
@@ -98,7 +98,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public List<Application> findAll() {
         List<Application> applications = applicationRepository.findAll();
-        return applications;
+        if (applications == null){
+            return null;
+        } else {
+            return applications;
+        }
     }
 
     @Override
