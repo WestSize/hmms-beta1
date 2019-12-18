@@ -10,6 +10,7 @@ import java.util.List;
 @Service
 public class OfficeServiceImpl implements OfficeService {
 
+    @Autowired
     private OfficeRepository officeRepository;
 
     @Override
@@ -31,8 +32,12 @@ public class OfficeServiceImpl implements OfficeService {
 
     @Override
     public List<Office> findAll() {
-        List<Office> offices = officeRepository.findAll();
-        return offices;
+        List offices = officeRepository.findAll();
+        if(offices.size()==0 || offices.isEmpty() || offices == null) {
+            return null;
+        } else {
+            return  offices;
+        }
     }
 
     @Override

@@ -42,12 +42,9 @@ public class MessagesController {
             if(messageService.showOnlyUsersMessages(userEmail).size()>0) {
                 model.addAttribute("messages", messageService.showOnlyUsersMessages(userEmail));
                 model.addAttribute("textmsgs", messageService.findAll());
-//                model.addAttribute("seen", privateConversationRepository.findAllUsersConversationByEmail(principal.getName()));
                 model.addAttribute("seen", privateConversationService.findAll());
                 return "messages";
             } else {
-                //User user = userRepository.findByEmail(principal.getName());
-                //user.setUnreadedMessages(0);
                 return "messages-empty";
             }
         } else {

@@ -19,14 +19,12 @@ import java.util.Date;
 
 @Controller
 public class IncomesController {
-
     @Autowired
     private UserService userService;
     @Autowired
     private CompanyService companyService;
     @Autowired
     private IncomeService incomeService;
-
 
     @RequestMapping(value = "/income-page", method = RequestMethod.GET)
     public String companyIncome(Model model, Principal principal, Long id){

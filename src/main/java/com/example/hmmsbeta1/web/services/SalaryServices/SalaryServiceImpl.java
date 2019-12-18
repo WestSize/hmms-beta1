@@ -15,13 +15,21 @@ public class SalaryServiceImpl implements SalaryService {
     @Override
     public List<Salary> showWorkerSalariesByWorkerId(Long id) {
         List<Salary> salaries = salaryRepository.showWorkerSalariesByWorkerId(id);
-        return salaries;
+        if(salaries == null){
+            return null;
+        } else {
+            return salaries;
+        }
     }
 
     @Override
     public List<Salary> showLast12WorkerSalariesByWorkerId(Long id) {
         List<Salary> salaries = salaryRepository.showLast12WorkerSalariesByWorkerId(id);
-        return salaries;
+        if(salaries == null){
+            return null;
+        } else {
+            return salaries;
+        }
     }
 
     @Override

@@ -43,9 +43,9 @@ public class CompaniesController {
     private WorkScheduleService workScheduleService;
     @Autowired
     private IncomeService incomeService;
-
-
+    @Autowired
     private SalaryService salaryService;
+
     public static String uploadDirectory = System.getProperty("user.dir") + "/uploads";
     private Long companyId = null;
 
@@ -180,7 +180,12 @@ public class CompaniesController {
 
     @RequestMapping(value = "/company-list", method = RequestMethod.GET)
     public String companyList(Model model, Principal principal) {
+        User me = userService.findByEmail(principal.getName());
+        if(me.getWorkingStatus().equals("owner")){
+            return "redirect:/company-home?notWorker";
+        }
         model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
+        model.addAttribute("companiesCounter", companyService.findAll().size());
         model.addAttribute("allcompanies", companyService.findAll());
         return "/company-list";
     }

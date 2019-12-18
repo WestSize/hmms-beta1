@@ -34,9 +34,13 @@ public class OfficesController {
         } else if (!me.equals(company.getUser())){
             return "redirect:/company-home?notYourCompany2";
         }
-        List<Office> companyOffices = officeService.showOfficesByCompanyId(id);
-        model.addAttribute("companyOfficesCounter", companyOffices.size());
-        model.addAttribute("comapnyOffices", companyOffices);
+        List companyOffices = officeService.showOfficesByCompanyId(id);
+        if(companyOffices != null) {
+            model.addAttribute("companyOfficesCounter", companyOffices.size());
+            model.addAttribute("comapnyOffices", companyOffices);
+        } else {
+            model.addAttribute("companyOfficesCounter", "0");
+        }
         model.addAttribute("companyInfo", company);
         model.addAttribute("me", me);
         return "offices";

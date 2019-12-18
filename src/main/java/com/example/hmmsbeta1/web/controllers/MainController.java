@@ -49,13 +49,12 @@ public class MainController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public ModelAndView home(Model model, Principal principal) {
         model.addAttribute("userPMs", userService.findByEmail(principal.getName()).getUnreadedMessages());
-//        int userUnreededMsgs = userService.countUnreededMessages(principal.getName());
         model.addAttribute("updateuser", new User());
         //        ot tuka pochva reloada na principalite
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         List<GrantedAuthority> updatedAuthorities = new ArrayList<>(auth.getAuthorities());
-        updatedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER")); //add your role here [e.g., new SimpleGrantedAuthority("ROLE_NEW_ROLE")]
+        updatedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
         Authentication newAuth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), updatedAuthorities);
 
