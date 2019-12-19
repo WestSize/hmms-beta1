@@ -16,6 +16,10 @@ public class IncomeServiceImpl implements IncomeService {
     @Autowired
     private IncomeRepository incomeRepository;
 
+    public IncomeServiceImpl(IncomeRepository incomeRepository) {
+        this.incomeRepository = incomeRepository;
+    }
+
     @Override
     public List<Income> showAllIncomesByCompanyId(Long id) {
         List<Income> incomes = incomeRepository.showAllIncomesByCompanyId(id);
@@ -45,6 +49,18 @@ public class IncomeServiceImpl implements IncomeService {
         int incomeSum = company.getIncome();
         income.setIncomePrice(incomeSum);
         incomeRepository.save(income);
+    }
+
+    @Override
+    public void addNew(Income income, Company company) {
+        Income incomeNew = new Income();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy'-'MM-dd");
+        Date date = new Date(System.currentTimeMillis());
+        incomeNew.setCompany(company);
+        incomeNew.setIncomeDate(formatter.format(date));
+        incomeNew.setIncomePrice(income.getIncomePrice());
+        incomeNew.setIncomeDescription(income.getIncomeDescription());
+        incomeRepository.save(incomeNew);
     }
 
     @Override

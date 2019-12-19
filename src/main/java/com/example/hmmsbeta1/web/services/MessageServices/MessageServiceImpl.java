@@ -24,6 +24,12 @@ public class MessageServiceImpl implements MessageService{
     @Autowired
     private CompanyService companyService;
 
+    public MessageServiceImpl(MessageRepository messageRepository, UserService userService, CompanyService companyService) {
+        this.messageRepository = messageRepository;
+        this.userService = userService;
+        this.companyService = companyService;
+    }
+
     @Override
     public List findAllByPrivateConversationId(Long id) {
         List<Message> messages = messageRepository.findAllByPrivateConversationId(id);

@@ -32,6 +32,13 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 //    private Long companyId = null;
 
+
+    public ApplicationServiceImpl(ApplicationRepository applicationRepository, UserService userService, CompanyService companyService) {
+        this.applicationRepository = applicationRepository;
+        this.userService = userService;
+        this.companyService = companyService;
+    }
+
     @Override
     public List showOnlyUsersCompanyApplications(Long id) {
         List<Application> applications = applicationRepository.showOnlyUsersCompanyApplications(id);
@@ -68,10 +75,6 @@ public class ApplicationServiceImpl implements ApplicationService {
         return application;
     }
 
-//    @Override
-//    public void save(Application application) {
-//        applicationRepository.save(application);
-//    }
     @Override
     public void save(MultipartFile[] files, Company company, Principal principal, Application application, String uploadDirectory, Long companyId) throws IOException {
         StringBuilder fileNames = new StringBuilder();

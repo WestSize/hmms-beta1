@@ -22,6 +22,11 @@ public class CompanyServiceImpl implements CompanyService {
     @Autowired
     private UserService userService;
 
+    public CompanyServiceImpl(CompanyRepository companyRepository, UserService userService) {
+        this.companyRepository = companyRepository;
+        this.userService = userService;
+    }
+
     @Override
     public List showOnlyUsersCompanies(String email) {
         List<Company> companies = companyRepository.showOnlyUsersCompanies(email);

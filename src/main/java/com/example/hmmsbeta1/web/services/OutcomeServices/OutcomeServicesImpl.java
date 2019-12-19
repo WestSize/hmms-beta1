@@ -15,6 +15,10 @@ public class OutcomeServicesImpl implements OutcomeService {
     @Autowired
     private OutcomeRepository outcomeRepository;
 
+    public OutcomeServicesImpl(OutcomeRepository outcomeRepository) {
+        this.outcomeRepository=outcomeRepository;
+    }
+
     @Override
     public List<Outcome> findLast12OutcomesByCompanyId(Long id) {
         List<Outcome> outcomes = outcomeRepository.findLast12OutcomesByCompanyId(id);

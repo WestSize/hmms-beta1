@@ -46,7 +46,7 @@ public class IncomesController {
         if(income.getIncomePrice()<0){
             return "redirect:/income-page?id="+company.getId()+"&noMinusError";
         }
-        incomeService.save(company);
+        incomeService.addNew(income, company);
         companyService.setCompanyIncomeAndProfitPlusOne(company, income);
         return "redirect:/income-page?id="+company.getId();
     }

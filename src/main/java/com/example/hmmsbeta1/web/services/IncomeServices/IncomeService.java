@@ -12,6 +12,7 @@ public interface IncomeService {
     List<Income> showLast12IncomesByCompanyId(Long id);
     List<Income> showAllIncomesByCompanyIdAndDate(Long id, String date);
     void save(Company company);
+    void addNew(Income income, Company company);
     Income getOne(Long id);
     List<Income> findAll();
     void deleteById(Long id);

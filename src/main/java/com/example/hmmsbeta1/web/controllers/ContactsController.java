@@ -8,7 +8,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ContactsController {
-    @RequestMapping(value = "/contact", method = RequestMethod.GET)
+    @RequestMapping(value = "/contacts", method = RequestMethod.GET)
     public ModelAndView home(){
         return new ModelAndView("contact");
     }
